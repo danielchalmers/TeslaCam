@@ -8,12 +8,12 @@ public partial class CamFile
     public DateTime Timestamp { get; private set; }
     public string CameraName { get; private set; }
     public string FileName { get; private set; }
-    public string Directory { get; private set; }
+    public string DirectoryPath { get; private set; }
 
     public CamFile(string filePath)
     {
         FileName = Path.GetFileName(filePath);
-        Directory = Path.GetDirectoryName(filePath);
+        DirectoryPath = Path.GetDirectoryName(filePath);
 
         var match = FileNameRegex().Match(FileName);
         if (match.Success)
@@ -29,4 +29,17 @@ public partial class CamFile
 
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})-(?<camera>.+)")]
     private static partial Regex FileNameRegex();
+
+    public static IEnumerable<CamFile> GetClipFiles(string rootDirectory)
+    {
+        var files = Directory.GetFiles(rootDirectory, "*", SearchOption.TopDirectoryOnly);
+        foreach (var file in files)
+        {
+            var match = FileNameRegex().Match(Path.GetFileName(file));
+            if (match.Success)
+            {
+                yield return new CamFile(file);
+            }
+        }
+    }
 }

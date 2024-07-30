@@ -27,7 +27,7 @@ public partial class CamFile
         }
     }
 
-    [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})-(?<camera>.+)")]
+    [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})-(?<camera>.+)\.mp4")]
     private static partial Regex FileNameRegex();
 
     public static IEnumerable<CamFile> GetClipFiles(string rootDirectory)
@@ -42,4 +42,6 @@ public partial class CamFile
             }
         }
     }
+
+    public override string ToString() => $"{Timestamp} - {CameraName}";
 }

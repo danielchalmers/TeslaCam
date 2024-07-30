@@ -9,7 +9,7 @@ public partial class CamStorage
 
     public CamStorage(string path)
     {
-        DirectoryPath = path;
+        DirectoryPath = Path.GetFullPath(path);
         Clips = CamFolder.GetClipFolders(path).ToHashSet();
     }
 
@@ -35,4 +35,6 @@ public partial class CamStorage
             }
         }
     }
+
+    public override string ToString() => $"{Clips.Count} clips ({Path.GetPathRoot(DirectoryPath)})";
 }

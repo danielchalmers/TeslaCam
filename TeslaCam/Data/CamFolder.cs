@@ -13,7 +13,7 @@ public partial class CamFolder
 
     public CamFolder(string path)
     {
-        DirectoryPath = Path.GetDirectoryName(path);
+        DirectoryPath = Path.GetFullPath(path);
 
         var match = FolderNameRegex().Match(DirectoryPath);
         if (match.Success)
@@ -25,8 +25,8 @@ public partial class CamFolder
             throw new ArgumentException("Invalid folder name format");
         }
 
-        Files = CamFile.GetClipFiles(path).ToHashSet();
-        Event = GetEventData(Path.Combine(path, "event.json"));
+        Files = CamFile.GetClipFiles(DirectoryPath).ToHashSet();
+        Event = GetEventData(Path.Combine(DirectoryPath, "event.json"));
     }
 
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]
@@ -45,10 +45,17 @@ public partial class CamFolder
         }
     }
 
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
+    };
+
     public static CamEvent GetEventData(string filePath)
     {
         var json = File.ReadAllText(filePath);
-        var camEvent = JsonSerializer.Deserialize<CamEvent>(json);
+        var camEvent = JsonSerializer.Deserialize<CamEvent>(json, JsonSerializerOptions);
         return camEvent;
     }
+
+    public override string ToString() => $"{Timestamp}";
 }

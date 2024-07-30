@@ -11,7 +11,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        var camStorage = CamStorage.GetSticks().FirstOrDefault();
+        //var camStorage = CamStorage.GetSticks().FirstOrDefault();
+        var camStorage = new CamStorage("./TeslaCam"); // Always check local directory.
         Console.WriteLine(camStorage.DirectoryPath);
     }
 }

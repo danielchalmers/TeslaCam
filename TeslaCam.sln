@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# 17
+VisualStudioVersion = 17.11.35111.106
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeslaCam", "TeslaCam\TeslaCam.csproj", "{9C768647-8619-449C-AAE0-20028B36B016}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9C768647-8619-449C-AAE0-20028B36B016}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C768647-8619-449C-AAE0-20028B36B016}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C768647-8619-449C-AAE0-20028B36B016}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C768647-8619-449C-AAE0-20028B36B016}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F66C12D5-9FD8-4CAA-9A8E-D410E234888F}
+	EndGlobalSection
+EndGlobal

@@ -5,8 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TeslaCam"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Viewbox Stretch="Uniform">
+        <Grid>
+            <!-- Main MediaElement covering the whole window -->
+            <MediaElement Name="MainMedia"
+                          LoadedBehavior="Play"
+                          Source="{Binding MainMediaSource}"
+                          Stretch="Fill" />
 
-    </Grid>
+            <!-- Bottom Left MediaElement -->
+            <MediaElement Name="BottomLeftMedia"
+                          Width="100" Height="100"
+                          HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                          Margin="10"
+                          LoadedBehavior="Play"
+                          Source="{Binding BottomLeftMediaSource}" />
+
+            <!-- Bottom Right MediaElement -->
+            <MediaElement Name="BottomRightMedia"
+                          Width="100" Height="100"
+                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                          Margin="10"
+                          LoadedBehavior="Play"
+                          Source="{Binding BottomRightMediaSource}" />
+        </Grid>
+    </Viewbox>
 </Window>

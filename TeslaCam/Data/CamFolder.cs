@@ -4,11 +4,11 @@ using System.Text.RegularExpressions;
 
 namespace TeslaCam.Data;
 
-public partial class CamFolder
+public partial record class CamFolder
 {
     public DateTime Timestamp { get; private set; }
     public string DirectoryPath { get; private set; }
-    public IReadOnlySet<CamFile> Files { get; private set; }
+    public IReadOnlyList<CamChunk> Chunks { get; private set; }
     public CamEvent Event { get; private set; }
 
     public CamFolder(string path)
@@ -25,7 +25,7 @@ public partial class CamFolder
             throw new ArgumentException("Invalid folder name format");
         }
 
-        Files = CamFile.GetClipFiles(DirectoryPath).ToHashSet();
+        Chunks = CamChunk.GetChunks(DirectoryPath).OrderBy(x => x.Timestamp).ToList();
         Event = GetEventData(Path.Combine(DirectoryPath, "event.json"));
     }
 

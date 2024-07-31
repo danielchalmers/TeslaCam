@@ -2,7 +2,7 @@
 
 namespace TeslaCam.Data;
 
-public partial class CamStorage
+public partial record class CamStorage
 {
     public string DirectoryPath { get; private set; }
     public IReadOnlySet<CamFolder> Clips { get; private set; }

@@ -3,19 +3,17 @@ using System.Text.RegularExpressions;
 
 namespace TeslaCam.Data;
 
-public partial class CamFile
+public partial record class CamFile
 {
     public DateTime Timestamp { get; private set; }
     public string CameraName { get; private set; }
-    public string FileName { get; private set; }
-    public string DirectoryPath { get; private set; }
+    public string FilePath { get; private set; }
 
     public CamFile(string filePath)
     {
-        FileName = Path.GetFileName(filePath);
-        DirectoryPath = Path.GetDirectoryName(filePath);
+        FilePath = Path.GetFullPath(filePath);
 
-        var match = FileNameRegex().Match(FileName);
+        var match = FileNameRegex().Match(Path.GetFileName(filePath));
         if (match.Success)
         {
             Timestamp = DateTime.ParseExact(match.Groups["date"].Value, "yyyy-MM-dd_HH-mm-ss", null);
@@ -32,7 +30,7 @@ public partial class CamFile
 
     public static IEnumerable<CamFile> GetClipFiles(string rootDirectory)
     {
-        var files = Directory.GetFiles(rootDirectory, "*", SearchOption.TopDirectoryOnly);
+        var files = Directory.EnumerateFiles(rootDirectory, "*", SearchOption.TopDirectoryOnly);
         foreach (var file in files)
         {
             var match = FileNameRegex().Match(Path.GetFileName(file));

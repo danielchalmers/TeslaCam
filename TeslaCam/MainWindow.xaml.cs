@@ -28,11 +28,11 @@ public partial class MainWindow : Window
         CurrentChunk = _camStorage.Clips.FirstOrDefault().Chunks.First;
     }
 
-    public Uri MainMediaSource => GetCameraFeed("front");
-    public Uri BottomLeftMediaSource => GetCameraFeed("left_repeater");
-    public Uri BottomRightMediaSource => GetCameraFeed("right_repeater");
+    public Uri MainSource => GetCameraFeed("front");
+    public Uri BottomLeftSource => GetCameraFeed("left_repeater");
+    public Uri BottomRightSource => GetCameraFeed("right_repeater");
 
-    private Uri GetCameraFeed(string name) => new(CurrentChunk.Value.TryGetCamera(name)?.FilePath);
+    private Uri GetCameraFeed(string name) => new(CurrentChunk.Value.TryGetCamera(name).FilePath);
 
     private void MainMedia_MediaFailed(object sender, ExceptionRoutedEventArgs e)
     {
@@ -42,8 +42,8 @@ public partial class MainWindow : Window
     private void MainMedia_MediaEnded(object sender, RoutedEventArgs e)
     {
         CurrentChunk = CurrentChunk.Next;
-        OnPropertyChanged(nameof(MainMediaSource));
-        OnPropertyChanged(nameof(BottomLeftMediaSource));
-        OnPropertyChanged(nameof(BottomRightMediaSource));
+        OnPropertyChanged(nameof(MainSource));
+        OnPropertyChanged(nameof(BottomLeftSource));
+        OnPropertyChanged(nameof(BottomRightSource));
     }
 }

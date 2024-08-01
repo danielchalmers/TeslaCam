@@ -6,9 +6,10 @@
         xmlns:local="clr-namespace:TeslaCam"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow"
+        SizeToContent="WidthAndHeight">
     <Viewbox Stretch="Uniform">
-        <Grid>
+        <Grid Width="1280" Height="960">
             <!-- Main MediaElement covering the whole window -->
             <MediaElement Name="MainMedia"
                           LoadedBehavior="Play"
@@ -17,17 +18,17 @@
 
             <!-- Bottom Left MediaElement -->
             <MediaElement Name="BottomLeftMedia"
-                          Width="100" Height="100"
+                          Width="256" Height="192"
                           HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                          Margin="10"
+                          Margin="20"
                           LoadedBehavior="Play"
                           Source="{Binding BottomLeftMediaSource}" />
 
             <!-- Bottom Right MediaElement -->
             <MediaElement Name="BottomRightMedia"
-                          Width="100" Height="100"
+                          Width="256" Height="192"
                           HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                          Margin="10"
+                          Margin="20"
                           LoadedBehavior="Play"
                           Source="{Binding BottomRightMediaSource}" />
         </Grid>

@@ -17,7 +17,8 @@ public record class CamChunk
     {
         var chunks = CamFile.GetClipFiles(directoryPath)
             .GroupBy(f => f.Timestamp)
-            .OrderBy(f => f.Key)
+            .Where(g => g.Any(x => x.CameraName == "front"))
+            .OrderBy(g => g.Key)
             .Select(g => new CamChunk(g.Key, g))
             .ToList();
 

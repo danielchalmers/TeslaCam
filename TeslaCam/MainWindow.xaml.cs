@@ -22,7 +22,7 @@ public partial class MainWindow : Window
 
         _camStorage = CamStorage.GetSticks().FirstOrDefault();
         _camStorage ??= new CamStorage("./TeslaCam"); // Always fall back to local directory.
-        CurrentChunk = _camStorage.Clips.FirstOrDefault().Chunks.First.Next;
+        CurrentChunk = _camStorage.Clips.FirstOrDefault().Chunks.First;
     }
 
 

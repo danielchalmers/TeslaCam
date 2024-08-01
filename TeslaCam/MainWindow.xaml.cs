@@ -1,10 +1,13 @@
 ﻿using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
 using TeslaCam.Data;
 
 namespace TeslaCam;
+
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
+[ObservableObject]
 public partial class MainWindow : Window
 {
     public MainWindow()

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TeslaCam"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
-        Title="MainWindow"
+        Title="TeslaCam Player"
         SizeToContent="Width">
     <Viewbox Stretch="Uniform">
         <Grid Width="1280" Height="960">

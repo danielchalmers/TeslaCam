@@ -1,0 +1,10 @@
+﻿<?define Name = "TeslaCam Player"?>
+<?define BuildName = "TeslaCam"?>
+<?define Manufacturer = "Daniel Chalmers"?>
+<?define Guid = "36C4480D-7AA9-48A1-BE99-6344CF857FB7"?>
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="$(var.Name)" Manufacturer="$(var.Manufacturer)" Version="!(bind.FileVersion.MainExe)" UpgradeCode="$(var.Guid)" Language="1033" InstallerVersion="500" Scope="perUser">
+
+  </Package>
+</Wix>

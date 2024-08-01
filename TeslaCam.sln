@@ -2,7 +2,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # 17
 VisualStudioVersion = 17.11.35111.106
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeslaCam", "TeslaCam\TeslaCam.csproj", "{9C768647-8619-449C-AAE0-20028B36B016}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TeslaCam", "TeslaCam\TeslaCam.csproj", "{9C768647-8619-449C-AAE0-20028B36B016}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeslaCam.Tests", "TeslaCam.Tests\TeslaCam.Tests.csproj", "{56F8F036-5B8F-406D-90D7-69D2B8C00044}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +16,10 @@ Global
 		{9C768647-8619-449C-AAE0-20028B36B016}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C768647-8619-449C-AAE0-20028B36B016}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C768647-8619-449C-AAE0-20028B36B016}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56F8F036-5B8F-406D-90D7-69D2B8C00044}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56F8F036-5B8F-406D-90D7-69D2B8C00044}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56F8F036-5B8F-406D-90D7-69D2B8C00044}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56F8F036-5B8F-406D-90D7-69D2B8C00044}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

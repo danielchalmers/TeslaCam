@@ -6,31 +6,68 @@
         xmlns:local="clr-namespace:TeslaCam"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
-        Title="MainWindow"
-        SizeToContent="WidthAndHeight">
+        Title="MainWindow">
+    <Window.Resources>
+        <Style x:Key="CornerMediaStyle" TargetType="MediaElement">
+            <Setter Property="Width" Value="256" />
+            <Setter Property="Height" Value="192" />
+        </Style>
+    </Window.Resources>
+
     <Viewbox Stretch="Uniform">
         <Grid Width="1280" Height="960">
             <!-- Main MediaElement covering the whole window -->
             <MediaElement Name="MainMedia"
-                          LoadedBehavior="Play"
-                          Source="{Binding MainMediaSource}"
-                          Stretch="Fill" />
+                  LoadedBehavior="Play"
+                  Source="{Binding MainMediaSource}"
+                  Stretch="Fill" />
 
-            <!-- Bottom Left MediaElement -->
-            <MediaElement Name="BottomLeftMedia"
-                          Width="256" Height="192"
-                          HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                          Margin="20"
-                          LoadedBehavior="Play"
-                          Source="{Binding BottomLeftMediaSource}" />
+            <!-- Overlay Grid for corner MediaElements -->
+            <Grid Background="Transparent" Margin="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="256" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="256" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="192" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="192" />
+                </Grid.RowDefinitions>
 
-            <!-- Bottom Right MediaElement -->
-            <MediaElement Name="BottomRightMedia"
-                          Width="256" Height="192"
-                          HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                          Margin="20"
+                <!-- Top Left MediaElement -->
+                <MediaElement Name="TopLeftMedia"
+                          Grid.Column="0" Grid.Row="0"
+                          Style="{StaticResource CornerMediaStyle}"
                           LoadedBehavior="Play"
-                          Source="{Binding BottomRightMediaSource}" />
+                          Source="{Binding TopLeftMediaSource}"
+                          Stretch="Uniform" />
+
+                <!-- Bottom Left MediaElement -->
+                <MediaElement Name="BottomLeftMedia"
+                          Grid.Column="0" Grid.Row="2"
+                          Style="{StaticResource CornerMediaStyle}"
+                          LoadedBehavior="Play"
+                          Source="{Binding BottomLeftMediaSource}"
+                          Stretch="Uniform" />
+
+                <!-- Top Right MediaElement -->
+                <MediaElement Name="TopRightMedia"
+                          Grid.Column="2" Grid.Row="0"
+                          Style="{StaticResource CornerMediaStyle}"
+                          LoadedBehavior="Play"
+                          Source="{Binding TopRightMediaSource}"
+                          Stretch="Uniform" />
+
+                <!-- Bottom Right MediaElement -->
+                <MediaElement Name="BottomRightMedia"
+                          Grid.Column="2" Grid.Row="2"
+                          Style="{StaticResource CornerMediaStyle}"
+                          LoadedBehavior="Play"
+                          Source="{Binding BottomRightMediaSource}"
+                          Stretch="Uniform" />
+            </Grid>
         </Grid>
+
     </Viewbox>
 </Window>

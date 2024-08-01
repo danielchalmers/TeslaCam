@@ -15,26 +15,28 @@ public partial class MainWindow : Window
     [ObservableProperty]
     private LinkedListNode<CamChunk> _currentChunk;
 
+    [ObservableProperty]
+    private string _errorMessage;
+
     public MainWindow()
     {
         InitializeComponent();
         DataContext = this;
 
         _camStorage = CamStorage.GetSticks().FirstOrDefault();
-        _camStorage ??= new CamStorage("./TeslaCam"); // Always fall back to local directory.
+        _camStorage ??= new CamStorage("./TeslaCam"); // Fall back to local directory.
         CurrentChunk = _camStorage.Clips.FirstOrDefault().Chunks.First;
     }
 
+    public Uri MainMediaSource => GetCameraFeed("front");
+    public Uri BottomLeftMediaSource => GetCameraFeed("left_repeater");
+    public Uri BottomRightMediaSource => GetCameraFeed("right_repeater");
 
-    public Uri MainMediaSource => new(CurrentChunk.Value.TryGetCamera("front")?.FilePath);
-    public Uri BottomLeftMediaSource => new(CurrentChunk.Value.TryGetCamera("left_repeater")?.FilePath);
-    public Uri BottomRightMediaSource => new(CurrentChunk.Value.TryGetCamera("right_repeater")?.FilePath);
+    private Uri GetCameraFeed(string name) => new(CurrentChunk.Value.TryGetCamera(name)?.FilePath);
 
     private void MainMedia_MediaFailed(object sender, ExceptionRoutedEventArgs e)
     {
-        MainMedia.Visibility = Visibility.Collapsed;
-        ErrorMessage.Text = "Error loading media: " + e.ErrorException.Message;
-        ErrorMessage.Visibility = Visibility.Visible;
+        ErrorMessage = "Error loading media: " + e.ErrorException.Message;
     }
 
     private void MainMedia_MediaEnded(object sender, RoutedEventArgs e)

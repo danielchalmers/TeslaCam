@@ -8,7 +8,7 @@ public partial record class CamFolder
 {
     public DateTime Timestamp { get; private set; }
     public string DirectoryPath { get; private set; }
-    public IReadOnlyList<CamChunk> Chunks { get; private set; }
+    public LinkedList<CamChunk> Chunks { get; private set; }
     public CamEvent Event { get; private set; }
 
     public CamFolder(string path)
@@ -25,7 +25,7 @@ public partial record class CamFolder
             throw new ArgumentException("Invalid folder name format");
         }
 
-        Chunks = CamChunk.GetChunks(DirectoryPath).OrderBy(x => x.Timestamp).ToList();
+        Chunks = CamChunk.GetChunks(DirectoryPath);
         Event = GetEventData(Path.Combine(DirectoryPath, "event.json"));
     }
 

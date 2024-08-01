@@ -28,18 +28,23 @@ public partial record class CamFile
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})-(?<camera>.+)\.mp4")]
     private static partial Regex FileNameRegex();
 
-    public static IEnumerable<CamFile> GetClipFiles(string rootDirectory)
+    public static LinkedList<CamFile> GetClipFiles(string rootDirectory)
     {
         var files = Directory.EnumerateFiles(rootDirectory, "*", SearchOption.TopDirectoryOnly);
+        var camFiles = new LinkedList<CamFile>();
+
         foreach (var file in files)
         {
             var match = FileNameRegex().Match(Path.GetFileName(file));
             if (match.Success)
             {
-                yield return new CamFile(file);
+                camFiles.AddLast(new CamFile(file));
             }
         }
+
+        return camFiles;
     }
+
 
     public override string ToString() => $"{Timestamp} - {CameraName}";
 }

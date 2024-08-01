@@ -22,7 +22,9 @@
             <!--  Main MediaElement covering the whole window  -->
             <MediaElement Name="MainMedia"
                           Source="{Binding MainMediaSource}"
-                          MediaFailed="MainMedia_MediaFailed" />
+                          MediaFailed="MainMedia_MediaFailed"
+                          MediaEnded="MainMedia_MediaEnded"
+                          SpeedRatio="10" />
 
             <!--  TextBlock for error message  -->
             <TextBlock Name="ErrorMessage"

@@ -13,11 +13,22 @@ public record class CamChunk
 
     public CamFile TryGetCamera(string name) => Files.FirstOrDefault(f => f.CameraName == name);
 
-    public static IEnumerable<CamChunk> GetChunks(string directoryPath)
+    public static LinkedList<CamChunk> GetChunks(string directoryPath)
     {
-        return CamFile.GetClipFiles(directoryPath)
-                .GroupBy(f => f.Timestamp)
-                .Select(g => new CamChunk(g.Key, g));
+        var chunks = CamFile.GetClipFiles(directoryPath)
+            .GroupBy(f => f.Timestamp)
+            .OrderBy(f => f.Key)
+            .Select(g => new CamChunk(g.Key, g))
+            .ToList();
+
+        var linkedList = new LinkedList<CamChunk>();
+
+        foreach (var chunk in chunks)
+        {
+            linkedList.AddLast(chunk);
+        }
+
+        return linkedList;
     }
 
     public override string ToString() => $"{Timestamp} - {Files.Count} files";

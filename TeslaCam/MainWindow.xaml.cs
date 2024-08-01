@@ -23,4 +23,11 @@ public partial class MainWindow : Window
     public Uri MainMediaSource => new(CurrentChunk.TryGetCamera("front")?.FilePath);
     public Uri BottomLeftMediaSource => new(CurrentChunk.TryGetCamera("left_repeater")?.FilePath);
     public Uri BottomRightMediaSource => new(CurrentChunk.TryGetCamera("right_repeater")?.FilePath);
+
+    private void MainMedia_MediaFailed(object sender, ExceptionRoutedEventArgs e)
+    {
+        MainMedia.Visibility = Visibility.Collapsed;
+        ErrorMessage.Text = "Error loading media: " + e.ErrorException.Message;
+        ErrorMessage.Visibility = Visibility.Visible;
+    }
 }

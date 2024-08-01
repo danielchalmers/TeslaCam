@@ -20,7 +20,18 @@
     <Viewbox Stretch="Uniform">
         <Grid Width="1280" Height="960">
             <!--  Main MediaElement covering the whole window  -->
-            <MediaElement Name="MainMedia" Source="{Binding MainMediaSource}" />
+            <MediaElement Name="MainMedia"
+                          Source="{Binding MainMediaSource}"
+                          MediaFailed="MainMedia_MediaFailed" />
+
+            <!--  TextBlock for error message  -->
+            <TextBlock Name="ErrorMessage"
+                       Foreground="Red"
+                       FontSize="48"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Visibility="Collapsed"
+                       TextWrapping="Wrap" />
 
             <!--  Overlay Grid for corner MediaElements  -->
             <Grid Background="Transparent" Margin="24">

@@ -1,11 +1,11 @@
 ﻿namespace TeslaCam.Data;
 
-public record class CamChunk
+public record class CamClipChunk
 {
     public DateTime Timestamp { get; private set; }
     public IReadOnlySet<CamFile> Files { get; private set; }
 
-    public CamChunk(DateTime timestamp, IEnumerable<CamFile> files)
+    public CamClipChunk(DateTime timestamp, IEnumerable<CamFile> files)
     {
         Timestamp = timestamp;
         Files = files.ToHashSet();
@@ -13,16 +13,16 @@ public record class CamChunk
 
     public CamFile TryGetCamera(string name) => Files.FirstOrDefault(f => f.CameraName == name);
 
-    public static LinkedList<CamChunk> GetChunks(string directoryPath)
+    public static LinkedList<CamClipChunk> GetChunks(string directoryPath)
     {
         var chunks = CamFile.GetClipFiles(directoryPath)
             .GroupBy(f => f.Timestamp)
             .Where(g => g.Any(x => x.CameraName == "front"))
             .OrderBy(g => g.Key)
-            .Select(g => new CamChunk(g.Key, g))
+            .Select(g => new CamClipChunk(g.Key, g))
             .ToList();
 
-        var linkedList = new LinkedList<CamChunk>();
+        var linkedList = new LinkedList<CamClipChunk>();
 
         foreach (var chunk in chunks)
         {

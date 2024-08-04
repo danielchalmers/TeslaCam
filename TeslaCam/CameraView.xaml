@@ -5,20 +5,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:TeslaCam"
              mc:Ignorable="d">
-    <Border Width="256"
-            Height="192"
-            Background="#80212121">
-        <Grid>
-            <MediaElement Source="{Binding SourceUri, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                          LoadedBehavior="Play"
-                          Stretch="Uniform" />
+    <Grid Width="256"
+          Height="192"
+          Background="#80212121">
+        <MediaElement Source="{Binding SourceUri, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                      LoadedBehavior="Play"
+                      Stretch="Uniform" />
 
-            <TextBlock Text="{Binding FeedName, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                       Foreground="White"
-                       FontSize="20"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Bottom"
-                       Margin="8" />
-        </Grid>
-    </Border>
+        <TextBlock Text="{Binding FeedName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Foreground="White"
+                   FontSize="20"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Bottom"
+                   Margin="8" />
+    </Grid>
 </UserControl>

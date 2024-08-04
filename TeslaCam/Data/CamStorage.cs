@@ -5,12 +5,12 @@ namespace TeslaCam.Data;
 public partial record class CamStorage
 {
     public string DirectoryPath { get; private set; }
-    public IReadOnlySet<CamFolder> Clips { get; private set; }
+    public IReadOnlySet<CamClip> Clips { get; private set; }
 
     public CamStorage(string path)
     {
         DirectoryPath = Path.GetFullPath(path);
-        Clips = CamFolder.GetClipFolders(path).ToHashSet();
+        Clips = CamClip.GetClipFolders(path).ToHashSet();
     }
 
     /// <summary>

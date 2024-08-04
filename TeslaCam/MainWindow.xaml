@@ -27,6 +27,8 @@
                        VerticalAlignment="Center"
                        TextWrapping="Wrap" />
 
+            <Image Source=""/>
+
             <!--  Overlay Grid for corner feeds  -->
             <Grid Background="Transparent" Margin="24">
                 <Grid.ColumnDefinitions>

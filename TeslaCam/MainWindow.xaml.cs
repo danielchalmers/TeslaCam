@@ -10,10 +10,11 @@ namespace TeslaCam;
 [ObservableObject]
 public partial class MainWindow : Window
 {
-    private readonly CamStorage _camStorage;
+    [ObservableProperty]
+    private CamStorage _camStorage;
 
     [ObservableProperty]
-    private LinkedListNode<CamChunk> _currentChunk;
+    private LinkedListNode<CamClipChunk> _currentChunk;
 
     [ObservableProperty]
     private string _errorMessage;
@@ -31,6 +32,7 @@ public partial class MainWindow : Window
     public Uri MainSource => GetCameraFeed("front");
     public Uri BottomLeftSource => GetCameraFeed("left_repeater");
     public Uri BottomRightSource => GetCameraFeed("right_repeater");
+    public Uri ThumbnailSource => CamStorage.;
 
     private Uri GetCameraFeed(string name) => new(CurrentChunk.Value.TryGetCamera(name).FilePath);
 

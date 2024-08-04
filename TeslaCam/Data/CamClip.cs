@@ -4,14 +4,15 @@ using System.Text.RegularExpressions;
 
 namespace TeslaCam.Data;
 
-public partial record class CamFolder
+public partial record class CamClip
 {
     public DateTime Timestamp { get; private set; }
     public string DirectoryPath { get; private set; }
-    public LinkedList<CamChunk> Chunks { get; private set; }
+    public LinkedList<CamClipChunk> Chunks { get; private set; }
     public CamEvent Event { get; private set; }
+    public Uri ThumbnailSource { get; private set; }
 
-    public CamFolder(string path)
+    public CamClip(string path)
     {
         DirectoryPath = Path.GetFullPath(path);
 
@@ -25,14 +26,15 @@ public partial record class CamFolder
             throw new ArgumentException("Invalid folder name format");
         }
 
-        Chunks = CamChunk.GetChunks(DirectoryPath);
+        Chunks = CamClipChunk.GetChunks(DirectoryPath);
         Event = GetEventData(Path.Combine(DirectoryPath, "event.json"));
+        ThumbnailSource = new Uri(Path.Combine(DirectoryPath, "event.json"));
     }
 
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]
     private static partial Regex FolderNameRegex();
 
-    public static IEnumerable<CamFolder> GetClipFolders(string rootDirectory)
+    public static IEnumerable<CamClip> GetClipFolders(string rootDirectory)
     {
         var directories = Directory.GetDirectories(rootDirectory, "*", SearchOption.AllDirectories);
         foreach (var directory in directories)

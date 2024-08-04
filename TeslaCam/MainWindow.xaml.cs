@@ -28,15 +28,4 @@ public partial class MainWindow : Window
         _camStorage ??= new CamStorage("./TeslaCam"); // Fall back to local directory.
         CurrentClip = _camStorage.Clips.FirstOrDefault();
     }
-
-    public Uri BottomLeftSource => GetCameraFeed("left_repeater");
-    public Uri BottomRightSource => GetCameraFeed("right_repeater");
-
-    private Uri GetCameraFeed(string name) => new(CurrentClip.CurrentChunk.Value.TryGetCamera(name).FilePath);
-
-    private void StageView_FileStarted(object sender, EventArgs e)
-    {
-        OnPropertyChanged(nameof(BottomLeftSource));
-        OnPropertyChanged(nameof(BottomRightSource));
-    }
 }

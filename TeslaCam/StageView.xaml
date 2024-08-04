@@ -5,14 +5,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:TeslaCam"
              mc:Ignorable="d">
-    <StackPanel>
+    <Grid>
         <MediaElement x:Name="MediaElement1"
                       MediaOpened="MediaElement_MediaOpened"
                       MediaEnded="MediaElement1_MediaEnded"
                       Stretch="Uniform"
                       LoadedBehavior="Manual"
                       UnloadedBehavior="Manual"
-                      SpeedRatio="15" />
+                      SpeedRatio="12" />
 
         <MediaElement x:Name="MediaElement2"
                       MediaOpened="MediaElement_MediaOpened"
@@ -20,6 +20,15 @@
                       Stretch="Uniform"
                       LoadedBehavior="Manual"
                       UnloadedBehavior="Manual"
-                      SpeedRatio="15" />
-    </StackPanel>
+                      SpeedRatio="12" />
+
+        <TextBlock x:Name="NameTextBlock"
+                   Text="{Binding CameraName, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Foreground="White"
+                   FontSize="20"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Bottom"
+                   Margin="8"
+                   Visibility="Collapsed" />
+    </Grid>
 </UserControl>

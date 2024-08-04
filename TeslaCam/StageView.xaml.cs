@@ -6,6 +6,7 @@ namespace TeslaCam;
 
 public partial class StageView : UserControl
 {
+    private LinkedListNode<CamClipChunk> _currentChunk;
     private MediaElement _currentElement;
     private MediaElement _nextElement;
 
@@ -21,6 +22,12 @@ public partial class StageView : UserControl
         typeof(StageView),
         new PropertyMetadata(null, OnCameraNameChanged));
 
+    public static readonly DependencyProperty MiniProperty = DependencyProperty.Register(
+        nameof(Mini),
+        typeof(bool),
+        typeof(StageView),
+        new PropertyMetadata(false, OnMiniChanged));
+
     public CamClip CamClip
     {
         get => (CamClip)GetValue(CamClipProperty);
@@ -33,6 +40,12 @@ public partial class StageView : UserControl
         set => SetValue(CameraNameProperty, value);
     }
 
+    public bool Mini
+    {
+        get => (bool)GetValue(MiniProperty);
+        set => SetValue(MiniProperty, value);
+    }
+
     public event EventHandler FileStarted;
 
     public StageView()
@@ -40,26 +53,37 @@ public partial class StageView : UserControl
         InitializeComponent();
         _currentElement = MediaElement1;
         _nextElement = MediaElement2;
+
+        MediaElement1.MediaOpened += MediaElement_MediaOpened;
+        MediaElement2.MediaOpened += MediaElement_MediaOpened;
+        MediaElement1.MediaEnded += MediaElement1_MediaEnded;
+        MediaElement2.MediaEnded += MediaElement2_MediaEnded;
     }
 
     private static void OnCamClipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (StageView)d;
+        control._currentChunk = control.CamClip.Chunks.First;
         control.PlayCurrentChunk();
     }
 
     private static void OnCameraNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (StageView)d;
-        control.PlayCurrentChunk();
+    }
+
+    private static void OnMiniChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var control = (StageView)d;
+        control.UpdateLayoutBasedOnMini();
     }
 
     private void PlayCurrentChunk()
     {
-        if (CamClip?.CurrentChunk?.Value == null)
+        if (_currentChunk?.Value == null)
             return;
 
-        var camFile = CamClip.CurrentChunk.Value.TryGetCamera(CameraName);
+        var camFile = _currentChunk.Value.TryGetCamera(CameraName);
         if (camFile == null)
             return;
 
@@ -67,17 +91,23 @@ public partial class StageView : UserControl
         _currentElement.Play();
     }
 
+    private void NextChunk()
+    {
+        _currentChunk = _currentChunk?.Next;
+    }
+
     private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
     {
         _currentElement.Visibility = Visibility.Visible;
         _nextElement.Visibility = Visibility.Collapsed;
 
+        // Raise the ClipStarted event
         FileStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)
     {
-        CamClip.NextChunk();
+        NextChunk();
         _currentElement = MediaElement2;
         _nextElement = MediaElement1;
         PlayCurrentChunk();
@@ -85,9 +115,25 @@ public partial class StageView : UserControl
 
     private void MediaElement2_MediaEnded(object sender, RoutedEventArgs e)
     {
-        CamClip.NextChunk();
+        NextChunk();
         _currentElement = MediaElement1;
         _nextElement = MediaElement2;
         PlayCurrentChunk();
+    }
+
+    private void UpdateLayoutBasedOnMini()
+    {
+        if (Mini)
+        {
+            Width = 256;
+            Height = 192;
+            NameTextBlock.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            Width = double.NaN;
+            Height = double.NaN;
+            NameTextBlock.Visibility = Visibility.Collapsed;
+        }
     }
 }

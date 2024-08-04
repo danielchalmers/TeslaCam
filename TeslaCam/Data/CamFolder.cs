@@ -34,7 +34,7 @@ public partial record class CamFolder
 
     public static IEnumerable<CamFolder> GetClipFolders(string rootDirectory)
     {
-        var directories = Directory.GetDirectories(rootDirectory, "*", SearchOption.TopDirectoryOnly);
+        var directories = Directory.GetDirectories(rootDirectory, "*", SearchOption.AllDirectories);
         foreach (var directory in directories)
         {
             var match = FolderNameRegex().Match(Path.GetFileName(directory));

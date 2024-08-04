@@ -11,9 +11,9 @@
     <Viewbox Stretch="Uniform">
         <Grid Width="1280" Height="960">
             <!--  Main feed covering the whole view  -->
-            <local:StageView x:Name="MainMedia"
-                             CamClip="{Binding CurrentClip}"
-                             CameraName="front" />
+            <local:StageView CamClip="{Binding CurrentClip}"
+                             CameraName="front"
+                             FileStarted="StageView_FileStarted" />
 
             <!--  TextBlock for error message  -->
             <TextBlock Text="{Binding ErrorMessage}"

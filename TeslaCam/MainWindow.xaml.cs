@@ -29,9 +29,14 @@ public partial class MainWindow : Window
         CurrentClip = _camStorage.Clips.FirstOrDefault();
     }
 
-    public Uri MainSource => GetCameraFeed("front");
     public Uri BottomLeftSource => GetCameraFeed("left_repeater");
     public Uri BottomRightSource => GetCameraFeed("right_repeater");
 
     private Uri GetCameraFeed(string name) => new(CurrentClip.CurrentChunk.Value.TryGetCamera(name).FilePath);
+
+    private void StageView_FileStarted(object sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(BottomLeftSource));
+        OnPropertyChanged(nameof(BottomRightSource));
+    }
 }

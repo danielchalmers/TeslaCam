@@ -33,6 +33,8 @@ public partial class StageView : UserControl
         set => SetValue(CameraNameProperty, value);
     }
 
+    public event EventHandler FileStarted;
+
     public StageView()
     {
         InitializeComponent();
@@ -69,6 +71,8 @@ public partial class StageView : UserControl
     {
         _currentElement.Visibility = Visibility.Visible;
         _nextElement.Visibility = Visibility.Collapsed;
+
+        FileStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)

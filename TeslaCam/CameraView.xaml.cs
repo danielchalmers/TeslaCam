@@ -4,7 +4,7 @@ using TeslaCam.Data;
 
 namespace TeslaCam;
 
-public partial class StageView : UserControl
+public partial class CameraView : UserControl
 {
     private LinkedListNode<CamClipChunk> _currentChunk;
     private MediaElement _currentElement;
@@ -13,19 +13,19 @@ public partial class StageView : UserControl
     public static readonly DependencyProperty CamClipProperty = DependencyProperty.Register(
         nameof(CamClip),
         typeof(CamClip),
-        typeof(StageView),
+        typeof(CameraView),
         new PropertyMetadata(null, OnCamClipChanged));
 
     public static readonly DependencyProperty CameraNameProperty = DependencyProperty.Register(
         nameof(CameraName),
         typeof(string),
-        typeof(StageView),
+        typeof(CameraView),
         new PropertyMetadata(null, OnCameraNameChanged));
 
     public static readonly DependencyProperty MiniProperty = DependencyProperty.Register(
         nameof(Mini),
         typeof(bool),
-        typeof(StageView),
+        typeof(CameraView),
         new PropertyMetadata(false, OnMiniChanged));
 
     public CamClip CamClip
@@ -48,7 +48,7 @@ public partial class StageView : UserControl
 
     public event EventHandler FileStarted;
 
-    public StageView()
+    public CameraView()
     {
         InitializeComponent();
         _currentElement = MediaElement1;
@@ -62,19 +62,19 @@ public partial class StageView : UserControl
 
     private static void OnCamClipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        var control = (StageView)d;
+        var control = (CameraView)d;
         control._currentChunk = control.CamClip.Chunks.First;
         control.PlayCurrentChunk();
     }
 
     private static void OnCameraNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        var control = (StageView)d;
+        var control = (CameraView)d;
     }
 
     private static void OnMiniChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        var control = (StageView)d;
+        var control = (CameraView)d;
         control.UpdateLayoutBasedOnMini();
     }
 

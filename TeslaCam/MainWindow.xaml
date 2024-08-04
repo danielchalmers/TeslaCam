@@ -11,7 +11,7 @@
     <Viewbox Stretch="Uniform">
         <Grid Width="1280" Height="960">
             <!--  Main feed covering the whole view  -->
-            <local:StageView CamClip="{Binding CurrentClip}" CameraName="front" />
+            <local:CameraView CamClip="{Binding CurrentClip}" CameraName="front" />
 
             <!--  TextBlock for error message  -->
             <TextBlock Text="{Binding ErrorMessage}"
@@ -36,28 +36,28 @@
                 </Grid.RowDefinitions>
 
                 <!--  Top Left feed  -->
-                <local:StageView Grid.Column="0"
+                <local:CameraView Grid.Column="0"
                                  Grid.Row="0"
                                  Mini="True"
                                  CamClip="{Binding CurrentClip}"
                                  CameraName="front" />
 
                 <!--  Top Right feed  -->
-                <local:StageView Grid.Column="2"
+                <local:CameraView Grid.Column="2"
                                  Grid.Row="0"
                                  Mini="True"
                                  CamClip="{Binding CurrentClip}"
                                  CameraName="back" />
 
                 <!--  Bottom Left feed  -->
-                <local:StageView Grid.Column="0"
+                <local:CameraView Grid.Column="0"
                                  Grid.Row="2"
                                  Mini="True"
                                  CamClip="{Binding CurrentClip}"
                                  CameraName="left_repeater" />
 
                 <!--  Bottom Right feed  -->
-                <local:StageView Grid.Column="2"
+                <local:CameraView Grid.Column="2"
                                  Grid.Row="2"
                                  Mini="True"
                                  CamClip="{Binding CurrentClip}"

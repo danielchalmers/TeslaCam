@@ -14,7 +14,7 @@ public partial class MainWindow : Window
     private CamStorage _camStorage;
 
     [ObservableProperty]
-    private LinkedListNode<CamClipChunk> _currentChunk;
+    private CamClip _currentClip;
 
     [ObservableProperty]
     private string _errorMessage;
@@ -26,26 +26,12 @@ public partial class MainWindow : Window
 
         _camStorage = CamStorage.GetSticks().FirstOrDefault();
         _camStorage ??= new CamStorage("./TeslaCam"); // Fall back to local directory.
-        CurrentChunk = _camStorage.Clips.FirstOrDefault().Chunks.First;
+        CurrentClip = _camStorage.Clips.FirstOrDefault();
     }
 
     public Uri MainSource => GetCameraFeed("front");
     public Uri BottomLeftSource => GetCameraFeed("left_repeater");
     public Uri BottomRightSource => GetCameraFeed("right_repeater");
-    public Uri ThumbnailSource => CamStorage.;
 
-    private Uri GetCameraFeed(string name) => new(CurrentChunk.Value.TryGetCamera(name).FilePath);
-
-    private void MainMedia_MediaFailed(object sender, ExceptionRoutedEventArgs e)
-    {
-        ErrorMessage = "Error loading media: " + e.ErrorException.Message;
-    }
-
-    private void MainMedia_MediaEnded(object sender, RoutedEventArgs e)
-    {
-        CurrentChunk = CurrentChunk.Next;
-        OnPropertyChanged(nameof(MainSource));
-        OnPropertyChanged(nameof(BottomLeftSource));
-        OnPropertyChanged(nameof(BottomRightSource));
-    }
+    private Uri GetCameraFeed(string name) => new(CurrentClip.CurrentChunk.Value.TryGetCamera(name).FilePath);
 }

@@ -12,6 +12,8 @@ public partial record class CamClip
     public CamEvent Event { get; private set; }
     public Uri ThumbnailSource { get; private set; }
 
+    public LinkedListNode<CamClipChunk> CurrentChunk { get; private set; }
+
     public CamClip(string path)
     {
         DirectoryPath = Path.GetFullPath(path);
@@ -27,8 +29,14 @@ public partial record class CamClip
         }
 
         Chunks = CamClipChunk.GetChunks(DirectoryPath);
+        CurrentChunk = Chunks.First;
         Event = GetEventData(Path.Combine(DirectoryPath, "event.json"));
-        ThumbnailSource = new Uri(Path.Combine(DirectoryPath, "event.json"));
+        ThumbnailSource = new Uri(Path.Combine(DirectoryPath, "thumb.png"));
+    }
+
+    public void NextChunk()
+    {
+        CurrentChunk = CurrentChunk.Next;
     }
 
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]

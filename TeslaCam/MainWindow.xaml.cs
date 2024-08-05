@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Serilog;
 using TeslaCam.Data;
 
 namespace TeslaCam;
@@ -26,6 +27,9 @@ public partial class MainWindow : Window
 
         _camStorage = CamStorage.GetSticks().FirstOrDefault();
         _camStorage ??= new CamStorage("./TeslaCam"); // Fall back to local directory.
+        Log.Debug($"Found storage: {_camStorage}");
+
         CurrentClip = _camStorage.Clips.FirstOrDefault();
+        Log.Debug($"Current clip: {CurrentClip}");
     }
 }

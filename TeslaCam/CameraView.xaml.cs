@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Serilog;
 using TeslaCam.Data;
 
 namespace TeslaCam;
@@ -19,8 +20,7 @@ public partial class CameraView : UserControl
     public static readonly DependencyProperty CameraNameProperty = DependencyProperty.Register(
         nameof(CameraName),
         typeof(string),
-        typeof(CameraView),
-        new PropertyMetadata(null, OnCameraNameChanged));
+        typeof(CameraView));
 
     public static readonly DependencyProperty MiniProperty = DependencyProperty.Register(
         nameof(Mini),
@@ -63,13 +63,8 @@ public partial class CameraView : UserControl
     private static void OnCamClipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (CameraView)d;
-        control._currentChunk = control.CamClip.Chunks.First;
+        control._currentChunk = (e.NewValue as CamClip).Chunks.First;
         control.PlayCurrentChunk();
-    }
-
-    private static void OnCameraNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-    {
-        var control = (CameraView)d;
     }
 
     private static void OnMiniChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -93,7 +88,8 @@ public partial class CameraView : UserControl
 
     private void NextChunk()
     {
-        _currentChunk = _currentChunk?.Next;
+        _currentChunk = _currentChunk.Next;
+        Log.Debug($"{CameraName}: Next chunk");
     }
 
     private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
@@ -101,12 +97,17 @@ public partial class CameraView : UserControl
         _currentElement.Visibility = Visibility.Visible;
         _nextElement.Visibility = Visibility.Collapsed;
 
-        // Raise the ClipStarted event
         FileStarted?.Invoke(this, EventArgs.Empty);
+        Log.Debug($"{CameraName}: {_currentChunk.Value.Timestamp}");
     }
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)
     {
+        if (_currentChunk.Next == null)
+        {
+            return;
+        }
+
         NextChunk();
         _currentElement = MediaElement2;
         _nextElement = MediaElement1;
@@ -115,6 +116,11 @@ public partial class CameraView : UserControl
 
     private void MediaElement2_MediaEnded(object sender, RoutedEventArgs e)
     {
+        if (_currentChunk.Next == null)
+        {
+            return;
+        }
+
         NextChunk();
         _currentElement = MediaElement1;
         _nextElement = MediaElement2;

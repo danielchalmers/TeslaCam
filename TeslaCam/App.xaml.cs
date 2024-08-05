@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Serilog;
 
 namespace TeslaCam;
 /// <summary>
@@ -6,5 +7,16 @@ namespace TeslaCam;
 /// </summary>
 public partial class App : Application
 {
-}
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
 
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .MinimumLevel.Debug()
+            .WriteTo.Debug()
+            .CreateLogger();
+
+        Log.Information("Application starting...");
+    }
+}

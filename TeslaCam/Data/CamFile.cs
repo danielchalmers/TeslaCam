@@ -45,6 +45,5 @@ public partial record class CamFile
         return camFiles;
     }
 
-
-    public override string ToString() => $"{Timestamp} - {CameraName}";
+    public override string ToString() => $"{CameraName}";
 }

@@ -53,11 +53,6 @@ public partial class CameraView : UserControl
         InitializeComponent();
         _currentElement = MediaElement1;
         _nextElement = MediaElement2;
-
-        MediaElement1.MediaOpened += MediaElement_MediaOpened;
-        MediaElement2.MediaOpened += MediaElement_MediaOpened;
-        MediaElement1.MediaEnded += MediaElement1_MediaEnded;
-        MediaElement2.MediaEnded += MediaElement2_MediaEnded;
     }
 
     private static void OnCamClipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -89,7 +84,6 @@ public partial class CameraView : UserControl
     private void NextChunk()
     {
         _currentChunk = _currentChunk.Next;
-        Log.Debug($"{CameraName}: Next chunk");
     }
 
     private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
@@ -103,6 +97,7 @@ public partial class CameraView : UserControl
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)
     {
+        Log.Debug($"{CameraName}: view 1 ended");
         if (_currentChunk.Next == null)
         {
             return;
@@ -116,6 +111,7 @@ public partial class CameraView : UserControl
 
     private void MediaElement2_MediaEnded(object sender, RoutedEventArgs e)
     {
+        Log.Debug($"{CameraName}: view 2 ended");
         if (_currentChunk.Next == null)
         {
             return;

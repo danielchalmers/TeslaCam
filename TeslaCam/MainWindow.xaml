@@ -7,62 +7,70 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         Title="TeslaCam Player"
-        SizeToContent="Width">
-    <Viewbox Stretch="Uniform">
-        <Grid Width="1280" Height="960">
-            <!--  Main feed covering the whole view  -->
-            <local:CameraView CamClip="{Binding CurrentClip}" CameraName="front" />
+        SizeToContent="Width"
+        Height="800">
+    <DockPanel>
+        <ListBox DockPanel.Dock="Left"
+                 Width="300"
+                 ItemsSource="{Binding CamStorage.Clips}"
+                 SelectedItem="{Binding CurrentClip, Mode=TwoWay}" />
 
-            <!--  TextBlock for error message  -->
-            <TextBlock Text="{Binding ErrorMessage}"
-                       Foreground="Red"
-                       FontSize="36"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       TextWrapping="Wrap" />
+        <Viewbox Stretch="Uniform">
+            <Grid Width="1280" Height="960">
+                <!--  Main feed covering the whole view  -->
+                <local:CameraView CamClip="{Binding CurrentClip}" CameraName="front" />
 
-            <!--  Overlay Grid for corner feeds  -->
-            <Grid Background="Transparent" Margin="24">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+                <!--  TextBlock for error message  -->
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="Red"
+                           FontSize="36"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap" />
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+                <!--  Overlay Grid for corner feeds  -->
+                <Grid Background="Transparent" Margin="24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-                <!--  Top Left feed  -->
-                <local:CameraView Grid.Column="0"
-                                 Grid.Row="0"
-                                 Mini="True"
-                                 CamClip="{Binding CurrentClip}"
-                                 CameraName="front" />
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                <!--  Top Right feed  -->
-                <local:CameraView Grid.Column="2"
-                                 Grid.Row="0"
-                                 Mini="True"
-                                 CamClip="{Binding CurrentClip}"
-                                 CameraName="back" />
+                    <!--  Top Left feed  -->
+                    <local:CameraView Grid.Column="0"
+                                      Grid.Row="0"
+                                      Mini="True"
+                                      CamClip="{Binding CurrentClip}"
+                                      CameraName="front" />
 
-                <!--  Bottom Left feed  -->
-                <local:CameraView Grid.Column="0"
-                                 Grid.Row="2"
-                                 Mini="True"
-                                 CamClip="{Binding CurrentClip}"
-                                 CameraName="left_repeater" />
+                    <!--  Top Right feed  -->
+                    <local:CameraView Grid.Column="2"
+                                      Grid.Row="0"
+                                      Mini="True"
+                                      CamClip="{Binding CurrentClip}"
+                                      CameraName="back" />
 
-                <!--  Bottom Right feed  -->
-                <local:CameraView Grid.Column="2"
-                                 Grid.Row="2"
-                                 Mini="True"
-                                 CamClip="{Binding CurrentClip}"
-                                 CameraName="right_repeater" />
+                    <!--  Bottom Left feed  -->
+                    <local:CameraView Grid.Column="0"
+                                      Grid.Row="2"
+                                      Mini="True"
+                                      CamClip="{Binding CurrentClip}"
+                                      CameraName="left_repeater" />
+
+                    <!--  Bottom Right feed  -->
+                    <local:CameraView Grid.Column="2"
+                                      Grid.Row="2"
+                                      Mini="True"
+                                      CamClip="{Binding CurrentClip}"
+                                      CameraName="right_repeater" />
+                </Grid>
             </Grid>
-        </Grid>
-    </Viewbox>
+        </Viewbox>
+    </DockPanel>
 </Window>

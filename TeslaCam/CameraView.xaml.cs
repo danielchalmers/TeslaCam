@@ -91,8 +91,8 @@ public partial class CameraView : UserControl
         _currentElement.Visibility = Visibility.Visible;
         _nextElement.Visibility = Visibility.Collapsed;
 
-        FileStarted?.Invoke(this, EventArgs.Empty);
         Log.Debug($"{CameraName}: {_currentChunk.Value.Timestamp}");
+        FileStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)

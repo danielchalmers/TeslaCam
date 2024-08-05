@@ -11,13 +11,20 @@
         MinHeight="600">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" MinWidth="300" />
+            <ColumnDefinition Width="*" MinWidth="200" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <ListBox Grid.Column="0"
-                 ItemsSource="{Binding CamStorage.Clips}"
-                 SelectedItem="{Binding CurrentClip, Mode=TwoWay}" />
+
+        <TreeView Grid.Column="0"
+                  ItemsSource="{Binding Storages}"
+                  SelectedItemChanged="OnSelectedItemChanged">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Clips}">
+                    <TextBlock Text="{Binding}" />
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
 
         <Viewbox Grid.Column="1" Stretch="Uniform">
             <Grid Width="1280" Height="960">

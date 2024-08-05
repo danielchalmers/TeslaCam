@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
 using TeslaCam.Data;
@@ -12,24 +14,41 @@ namespace TeslaCam;
 public partial class MainWindow : Window
 {
     [ObservableProperty]
-    private CamStorage _camStorage;
-
-    [ObservableProperty]
     private CamClip _currentClip;
 
     [ObservableProperty]
     private string _errorMessage;
+
+    public ObservableCollection<CamStorage> Storages { get; } = [];
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = this;
 
-        _camStorage = CamStorage.GetSticks().FirstOrDefault();
-        _camStorage ??= new CamStorage("./TeslaCam"); // Fall back to local directory.
-        Log.Debug($"Found storage: {_camStorage}");
+        // Local directory.
+        if (Directory.Exists("./TeslaCam"))
+        {
+            Storages.Add(new("./TeslaCam"));
+        }
 
-        CurrentClip = _camStorage.Clips.FirstOrDefault();
-        Log.Debug($"Current clip: {CurrentClip}");
+        // USB sticks.
+        foreach (var storage in CamStorage.GetSticks())
+        {
+            Storages.Add(storage);
+        }
+
+        Log.Debug($"Found storages: {string.Join(", ", Storages)}");
+
+        CurrentClip = Storages.First().Clips.FirstOrDefault();
+    }
+
+    private void OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (e.NewValue is CamClip selectedClip)
+        {
+            CurrentClip = selectedClip;
+            Log.Debug($"Selected clip: {CurrentClip}");
+        }
     }
 }

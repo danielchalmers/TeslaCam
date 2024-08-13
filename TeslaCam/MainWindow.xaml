@@ -15,10 +15,10 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-
         <TreeView Grid.Column="0"
                   ItemsSource="{Binding Storages}"
-                  SelectedItemChanged="OnSelectedItemChanged">
+                  SelectedItemChanged="OnSelectedItemChanged"
+                  Loaded="TreeView_Loaded">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Clips}">
                     <TextBlock Text="{Binding}" />

@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
 using TeslaCam.Data;
@@ -49,6 +50,26 @@ public partial class MainWindow : Window
         {
             CurrentClip = selectedClip;
             Log.Debug($"Selected clip: {CurrentClip}");
+        }
+    }
+
+    private void TreeView_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is TreeView treeView)
+        {
+            ExpandAllItems(treeView, treeView.Items);
+        }
+    }
+
+    private static void ExpandAllItems(TreeView treeView, ItemCollection items)
+    {
+        foreach (var item in items)
+        {
+            if (treeView.ItemContainerGenerator.ContainerFromItem(item) is TreeViewItem treeViewItem)
+            {
+                treeViewItem.IsExpanded = true;
+                ExpandAllItems(treeView, treeViewItem.Items);
+            }
         }
     }
 }

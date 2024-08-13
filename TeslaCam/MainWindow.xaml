@@ -29,7 +29,7 @@
         <Viewbox Grid.Column="1" Stretch="Uniform">
             <Grid Height="960">
                 <!--  Main feed covering the whole view  -->
-                <local:CameraView CamClip="{Binding CurrentClip}" CameraName="front" />
+                <local:CameraView CamClip="{Binding CurrentClip}" CameraPath="front" />
 
                 <!--  TextBlock for error message  -->
                 <TextBlock Text="{Binding ErrorMessage}"
@@ -58,28 +58,32 @@
                                       Grid.Row="0"
                                       Mini="True"
                                       CamClip="{Binding CurrentClip}"
-                                      CameraName="front" />
+                                      CameraPath="front"
+                                      CameraName="Front" />
 
                     <!--  Top Right feed  -->
                     <local:CameraView Grid.Column="2"
                                       Grid.Row="0"
                                       Mini="True"
                                       CamClip="{Binding CurrentClip}"
-                                      CameraName="back" />
+                                      CameraPath="back"
+                                      CameraName="Back" />
 
                     <!--  Bottom Left feed  -->
                     <local:CameraView Grid.Column="0"
                                       Grid.Row="2"
                                       Mini="True"
                                       CamClip="{Binding CurrentClip}"
-                                      CameraName="left_repeater" />
+                                      CameraPath="left_repeater"
+                                      CameraName="Left" />
 
                     <!--  Bottom Right feed  -->
                     <local:CameraView Grid.Column="2"
                                       Grid.Row="2"
                                       Mini="True"
                                       CamClip="{Binding CurrentClip}"
-                                      CameraName="right_repeater" />
+                                      CameraPath="right_repeater"
+                                      CameraName="Right" />
                 </Grid>
             </Grid>
         </Viewbox>

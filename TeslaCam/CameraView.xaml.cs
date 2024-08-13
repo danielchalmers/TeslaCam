@@ -17,6 +17,11 @@ public partial class CameraView : UserControl
         typeof(CameraView),
         new PropertyMetadata(null, OnCamClipChanged));
 
+    public static readonly DependencyProperty CameraPathProperty = DependencyProperty.Register(
+        nameof(CameraPath),
+        typeof(string),
+        typeof(CameraView));
+
     public static readonly DependencyProperty CameraNameProperty = DependencyProperty.Register(
         nameof(CameraName),
         typeof(string),
@@ -32,6 +37,12 @@ public partial class CameraView : UserControl
     {
         get => (CamClip)GetValue(CamClipProperty);
         set => SetValue(CamClipProperty, value);
+    }
+
+    public string CameraPath
+    {
+        get => (string)GetValue(CameraPathProperty);
+        set => SetValue(CameraPathProperty, value);
     }
 
     public string CameraName
@@ -73,7 +84,7 @@ public partial class CameraView : UserControl
         if (_currentChunk?.Value == null)
             return;
 
-        var camFile = _currentChunk.Value.TryGetCamera(CameraName);
+        var camFile = _currentChunk.Value.TryGetCamera(CameraPath);
         if (camFile == null)
             return;
 
@@ -91,13 +102,13 @@ public partial class CameraView : UserControl
         _currentElement.Visibility = Visibility.Visible;
         _nextElement.Visibility = Visibility.Collapsed;
 
-        Log.Debug($"{CameraName}: {_currentChunk.Value.Timestamp}");
+        Log.Debug($"{CameraPath}: {_currentChunk.Value.Timestamp}");
         FileStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)
     {
-        Log.Debug($"{CameraName}: view 1 ended");
+        Log.Debug($"{CameraPath}: view 1 ended");
         if (_currentChunk.Next == null)
         {
             return;
@@ -111,7 +122,7 @@ public partial class CameraView : UserControl
 
     private void MediaElement2_MediaEnded(object sender, RoutedEventArgs e)
     {
-        Log.Debug($"{CameraName}: view 2 ended");
+        Log.Debug($"{CameraPath}: view 2 ended");
         if (_currentChunk.Next == null)
         {
             return;

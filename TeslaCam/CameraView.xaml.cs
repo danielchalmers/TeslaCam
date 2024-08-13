@@ -128,13 +128,11 @@ public partial class CameraView : UserControl
         if (Mini)
         {
             Width = 256;
-            Height = 192;
             NameTextBlock.Visibility = Visibility.Visible;
         }
         else
         {
             Width = double.NaN;
-            Height = double.NaN;
             NameTextBlock.Visibility = Visibility.Collapsed;
         }
     }

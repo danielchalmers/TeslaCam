@@ -27,7 +27,7 @@
         </TreeView>
 
         <Viewbox Grid.Column="1" Stretch="Uniform">
-            <Grid Width="1280" Height="960">
+            <Grid Height="960">
                 <!--  Main feed covering the whole view  -->
                 <local:CameraView CamClip="{Binding CurrentClip}" CameraName="front" />
 

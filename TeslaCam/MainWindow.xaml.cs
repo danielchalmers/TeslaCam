@@ -39,9 +39,16 @@ public partial class MainWindow : Window
             Storages.Add(storage);
         }
 
-        Log.Debug($"Found storages: {string.Join(", ", Storages)}");
-
-        CurrentClip = Storages.First().Clips.FirstOrDefault();
+        if (Storages.Count == 0)
+        {
+            Log.Debug("No storages found");
+            ErrorMessage = "No TeslaCam folders found";
+        }
+        else
+        {
+            Log.Debug($"Found storages: {string.Join(", ", Storages)}");
+            CurrentClip = Storages.First().Clips.FirstOrDefault();
+        }
     }
 
     private void OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)

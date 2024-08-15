@@ -27,4 +27,10 @@
     <ProjectReference Include="..\TeslaCam.Data\TeslaCam.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Credits.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

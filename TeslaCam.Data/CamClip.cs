@@ -10,7 +10,7 @@ public partial record class CamClip
     public DateTime Timestamp { get; private init; }
     public LinkedList<CamClipChunk> Chunks { get; private init; }
     public CamEvent Event { get; private init; }
-    public string ThumbnailSource { get; private init; }
+    public string ThumbnailPath { get; private init; }
 
     public CamClip(string path)
     {
@@ -25,7 +25,7 @@ public partial record class CamClip
         Timestamp = DateTime.ParseExact(match.Groups["date"].Value, "yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
         Chunks = CamClipChunk.GetChunks(DirectoryPath);
         Event = GetEventData(Path.Combine(DirectoryPath, "event.json"));
-        ThumbnailSource = Path.Combine(DirectoryPath, "thumb.png");
+        ThumbnailPath = Path.Combine(DirectoryPath, "thumb.png");
     }
 
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]

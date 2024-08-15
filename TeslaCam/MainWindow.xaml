@@ -11,20 +11,30 @@
         MinHeight="600">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" MinWidth="200" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <TreeView Grid.Column="0"
-                  ItemsSource="{Binding Storages}"
-                  SelectedItemChanged="OnSelectedItemChanged"
-                  Loaded="TreeView_Loaded">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Clips}">
-                    <TextBlock Text="{Binding}" />
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
+        <!--  ListBox to display all clips with thumbnails  -->
+        <ListBox Grid.Column="0"
+                 ItemsSource="{Binding Clips}"
+                 SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <!--  Display the clip name or any text  -->
+                        <TextBlock Text="{Binding}"
+                                   FontSize="16"
+                                   FontWeight="Bold" />
+
+                        <!--  Display the thumbnail image  -->
+                        <Image Source="{Binding ThumbnailPath}"
+                               Width="128"
+                               Stretch="Uniform" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
         <Viewbox Grid.Column="1" Stretch="Uniform">
             <Grid Height="960">

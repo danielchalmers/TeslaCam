@@ -22,7 +22,7 @@ runs:
 
     - name: Publish
       shell: bash
-      run: dotnet publish ./TeslaCam/TeslaCam.csproj -o "publish" -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:Version=${{ inputs.version }}
+      run: dotnet publish ./TeslaCam/TeslaCam.csproj -o "portable" -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:Version=${{ inputs.version }}
 
     # - name: Create installer
     #   shell: bash
@@ -33,4 +33,4 @@ runs:
     - uses: actions/upload-artifact@v4
       with:
         path: |
-          publish
+          portable

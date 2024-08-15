@@ -2,6 +2,11 @@ name: Prepare for release
 
 description: Builds, tests, and creates an installer that's ready for release.
 
+inputs:
+  version:
+    description: 'Version number for the app'
+    default: '0.0.0'
+
 runs:
   using: "composite"
   steps:
@@ -17,7 +22,7 @@ runs:
 
     - name: Publish
       shell: bash
-      run: dotnet publish ./TeslaCam/TeslaCam.csproj -o "publish" -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+      run: dotnet publish ./TeslaCam/TeslaCam.csproj -o "publish" -c Release -r win-x64 --self-contained -p:PublishSingleFile=true /p:Version=${{ inputs.version }}
 
     - name: Create installer
       shell: bash

@@ -24,6 +24,10 @@ runs:
       shell: bash
       run: dotnet publish ./TeslaCam/TeslaCam.csproj -o "portable" -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:Version=${{ inputs.version }}
 
+    - name: Compress
+      shell: pwsh
+      run: Compress-Archive "portable/*" "portable.zip"
+
     # - name: Create installer
     #   shell: bash
     #   run: |
@@ -33,4 +37,4 @@ runs:
     - uses: actions/upload-artifact@v4
       with:
         path: |
-          portable
+          "portable.zip"

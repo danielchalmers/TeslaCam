@@ -1,11 +1,9 @@
-﻿using System.IO;
-
-namespace TeslaCam.Data;
+﻿namespace TeslaCam.Data;
 
 public partial record class CamStorage
 {
-    public string DirectoryPath { get; private set; }
-    public IReadOnlySet<CamClip> Clips { get; private set; }
+    public string DirectoryPath { get; private init; }
+    public IReadOnlySet<CamClip> Clips { get; private init; }
 
     public CamStorage(string path)
     {

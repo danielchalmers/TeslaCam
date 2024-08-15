@@ -84,7 +84,7 @@ public partial class CameraView : UserControl
         if (_currentChunk?.Value == null)
             return;
 
-        var camFile = _currentChunk.Value.TryGetCamera(CameraPath);
+        var camFile = _currentChunk.Value.Files.GetValueOrDefault(CameraPath);
         if (camFile == null)
             return;
 

@@ -2,25 +2,22 @@
 
 public record class CamClipChunk
 {
-    public DateTime Timestamp { get; private set; }
-    public IReadOnlySet<CamFile> Files { get; private set; }
+    public DateTime Timestamp { get; private init; }
+    public IReadOnlyDictionary<string, CamFile> Files { get; private init; }
 
     public CamClipChunk(DateTime timestamp, IEnumerable<CamFile> files)
     {
         Timestamp = timestamp;
-        Files = files.ToHashSet();
+        Files = files.ToDictionary(f => f.CameraName);
     }
-
-    public CamFile TryGetCamera(string name) => Files.FirstOrDefault(f => f.CameraName == name);
 
     public static LinkedList<CamClipChunk> GetChunks(string directoryPath)
     {
-        var chunks = CamFile.GetClipFiles(directoryPath)
+        var chunks = CamFile.GetCamFiles(directoryPath)
             .GroupBy(f => f.Timestamp)
-            .Where(g => g.Any(x => x.CameraName == "front"))
+            .Where(g => g.Any(x => x.CameraName == "front")) // Must have a front camera clip.
             .OrderBy(g => g.Key)
-            .Select(g => new CamClipChunk(g.Key, g))
-            .ToList();
+            .Select(g => new CamClipChunk(g.Key, g));
 
         var linkedList = new LinkedList<CamClipChunk>();
 

@@ -120,6 +120,11 @@ public partial class CameraView : UserControl
         PlayCurrentChunk();
     }
 
+    private void MediaElement1_MediaFailed(object sender, ExceptionRoutedEventArgs e)
+    {
+        Log.Debug($"{CameraPath}: view 1 failed");
+    }
+
     private void MediaElement2_MediaEnded(object sender, RoutedEventArgs e)
     {
         Log.Debug($"{CameraPath}: view 2 ended");
@@ -132,6 +137,11 @@ public partial class CameraView : UserControl
         _currentElement = MediaElement1;
         _nextElement = MediaElement2;
         PlayCurrentChunk();
+    }
+
+    private void MediaElement2_MediaFailed(object sender, ExceptionRoutedEventArgs e)
+    {
+        Log.Debug($"{CameraPath}: view 2 failed");
     }
 
     private void UpdateLayoutBasedOnMini()

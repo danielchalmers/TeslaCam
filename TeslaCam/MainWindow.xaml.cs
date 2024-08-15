@@ -70,6 +70,7 @@ public partial class MainWindow : Window
 
     private static void ExpandAllItems(TreeView treeView, ItemCollection items)
     {
+        Log.Debug("Expanding all tree view items");
         foreach (var item in items)
         {
             if (treeView.ItemContainerGenerator.ContainerFromItem(item) is TreeViewItem treeViewItem)

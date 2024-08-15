@@ -24,11 +24,11 @@ runs:
       shell: bash
       run: dotnet publish ./TeslaCam/TeslaCam.csproj -o "publish" -c Release -r win-x64 --self-contained -p:PublishSingleFile=true /p:Version=${{ inputs.version }}
 
-    - name: Create installer
-      shell: bash
-      run: |
-        dotnet tool install --global wix --version 5.0.1
-        wix build Product.wxs -o "publish/Install TeslaCam Player.msi"
+    # - name: Create installer
+    #   shell: bash
+    #   run: |
+    #     dotnet tool install --global wix --version 5.0.1
+    #     wix build Product.wxs -o "publish/Install TeslaCam Player.msi"
 
     - uses: actions/upload-artifact@v4
       with:

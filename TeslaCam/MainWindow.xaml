@@ -21,16 +21,16 @@
                  SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel>
-                        <!--  Display the clip name or any text  -->
-                        <TextBlock Text="{Binding}"
-                                   FontSize="16"
-                                   FontWeight="Bold" />
-
-                        <!--  Display the thumbnail image  -->
+                    <StackPanel Orientation="Horizontal">
                         <Image Source="{Binding ThumbnailPath}"
                                Width="128"
                                Stretch="Uniform" />
+
+                        <TextBlock Text="{Binding}"
+                                   FontSize="16"
+                                   FontWeight="DemiBold"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0" />
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

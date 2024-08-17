@@ -7,20 +7,19 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         Title="TeslaCam Player"
-        MinWidth="800"
-        MinHeight="600"
-        SizeToContent="Width">
+        MinWidth="1200"
+        MinHeight="600">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!--  ListBox to display all clips with thumbnails  -->
-        <ListBox Grid.Column="0"
+        <!--  Display all clips with thumbnails  -->
+        <ListView Grid.Column="0"
                  ItemsSource="{Binding Clips}"
                  SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
-            <ListBox.ItemTemplate>
+            <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{Binding ThumbnailPath}"
@@ -29,20 +28,20 @@
 
                         <TextBlock Text="{Binding}"
                                    FontSize="16"
-                                   FontWeight="DemiBold"
+                                   FontWeight="SemiBold"
                                    VerticalAlignment="Center"
                                    Margin="8,0,0,0" />
                     </StackPanel>
                 </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            </ListView.ItemTemplate>
+        </ListView>
 
         <Viewbox Grid.Column="1" Stretch="Uniform">
             <Grid Height="960">
                 <!--  Main feed covering the whole view  -->
                 <local:CameraView CamClip="{Binding CurrentClip}" CameraPath="front" />
 
-                <!--  TextBlock for error message  -->
+                <!--  Error message  -->
                 <TextBlock Text="{Binding ErrorMessage}"
                            Foreground="Red"
                            FontSize="36"
@@ -50,7 +49,7 @@
                            VerticalAlignment="Center"
                            TextWrapping="Wrap" />
 
-                <!--  Overlay Grid for corner feeds  -->
+                <!--  Overlay for mini camera views  -->
                 <Grid Background="Transparent" Margin="24">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />

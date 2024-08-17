@@ -17,8 +17,8 @@
 
         <!--  Display all clips with thumbnails  -->
         <ListView Grid.Column="0"
-                 ItemsSource="{Binding Clips}"
-                 SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
+                  ItemsSource="{Binding Clips}"
+                  SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">

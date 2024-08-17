@@ -4,7 +4,6 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
 using TeslaCam.Data;
-using Wpf.Ui.Appearance;
 
 namespace TeslaCam;
 
@@ -25,7 +24,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        ApplicationThemeManager.Apply(this);
         DataContext = this;
 
         var _storages = new HashSet<CamStorage>();

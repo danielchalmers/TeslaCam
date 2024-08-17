@@ -51,6 +51,9 @@ public partial record class CamClip
 
     public static CamEvent GetEventData(string filePath)
     {
+        if (!File.Exists(filePath))
+            return null;
+
         var json = File.ReadAllText(filePath);
         var camEvent = JsonSerializer.Deserialize<CamEvent>(json, JsonSerializerOptions);
         return camEvent;

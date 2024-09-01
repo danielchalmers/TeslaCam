@@ -3,16 +3,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>TeslaCam.ico</ApplicationIcon>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <Authors>Daniel Chalmers</Authors>
-    <Copyright>© Daniel Chalmers</Copyright>
-    <Product>TeslaCam Player for Windows</Product>
-    <Version>0.1.0</Version>
+    <ApplicationIcon>..\TeslaCam.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,12 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TeslaCam.Data\TeslaCam.Data.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Credits.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

@@ -1,22 +1,14 @@
-﻿using System.Windows;
-using Serilog;
+﻿namespace TeslaCam;
 
-namespace TeslaCam;
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
 public partial class App : Application
 {
-    protected override void OnStartup(StartupEventArgs e)
+    public App()
     {
-        base.OnStartup(e);
+        InitializeComponent();
+    }
 
-        Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
-            .MinimumLevel.Debug()
-            .WriteTo.Debug()
-            .CreateLogger();
-
-        Log.Information("Application starting...");
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        return new Window(new MainPage());
     }
 }

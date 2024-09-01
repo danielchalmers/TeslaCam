@@ -8,7 +8,6 @@
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
     <EnableDefaultCssItems>false</EnableDefaultCssItems>
-    <Nullable>enable</Nullable>
 
     <!-- Display name -->
     <ApplicationTitle>TeslaCam</ApplicationTitle>
@@ -48,6 +47,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0-preview.7.24405.7" />
     <PackageReference Include="MudBlazor" Version="7.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TeslaCam.Data\TeslaCam.Data.csproj" />
   </ItemGroup>
 
 </Project>

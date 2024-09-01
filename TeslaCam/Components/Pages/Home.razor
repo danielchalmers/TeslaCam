@@ -1,5 +1,74 @@
 ﻿@page "/"
+@inject IJSRuntime JS
 
-<h1>Hello, world!</h1>
+<h1>TeslaCam Player</h1>
 
-Welcome to your new app.
+<div class="main-container">
+    <div class="clip-list">
+        @foreach (var clip in Clips)
+        {
+                <div class="clip-item @(clip == CurrentClip ? "selected" : "")" @onclick="() => SelectClip(clip)">
+                    <img src="@clip.ThumbnailPath" alt="Clip Thumbnail" />
+                    <span>@clip.ToString()</span>
+                </div>
+        }
+    </div>
+
+    <div class="video-container">
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+                <div class="error-message">@ErrorMessage</div>
+        }
+        else
+        {
+                <div class="main-video">
+                    <CameraView CamClip="@CurrentClip" CameraPath="front" />
+                </div>
+                <div class="mini-videos">
+                    <CameraView CamClip="@CurrentClip" CameraPath="front" CameraName="Front" Mini="true" />
+                    <CameraView CamClip="@CurrentClip" CameraPath="back" CameraName="Back" Mini="true" />
+                    <CameraView CamClip="@CurrentClip" CameraPath="left_repeater" CameraName="Left" Mini="true" />
+                    <CameraView CamClip="@CurrentClip" CameraPath="right_repeater" CameraName="Right" Mini="true" />
+                </div>
+        }
+    </div>
+</div>
+
+@code {
+    private CamClip CurrentClip { get; set; }
+    private string ErrorMessage { get; set; }
+    private List<CamClip> Clips { get; set; } = new List<CamClip>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var storages = new HashSet<CamStorage>();
+
+        // Local directory
+        if (Directory.Exists("./TeslaCam"))
+        {
+            storages.Add(new CamStorage("./TeslaCam"));
+        }
+
+        // Note: Getting USB sticks will need to be handled differently in a web context
+        // This might involve a server-side API call
+
+        if (storages.Count == 0)
+        {
+            ErrorMessage = "No TeslaCam folders found";
+        }
+        else
+        {
+            foreach (var clips in storages.SelectMany(x => x.Clips))
+            {
+                Clips.Add(clips);
+            }
+        }
+
+        CurrentClip = Clips.FirstOrDefault();
+    }
+
+    private void SelectClip(CamClip clip)
+    {
+        CurrentClip = clip;
+    }
+}

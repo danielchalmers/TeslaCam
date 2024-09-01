@@ -1,14 +1,10 @@
-﻿namespace TeslaCam;
+﻿using System.Windows;
 
+namespace TeslaCam;
+
+/// <summary>
+/// Interaction logic for App.xaml
+/// </summary>
 public partial class App : Application
 {
-    public App()
-    {
-        InitializeComponent();
-    }
-
-    protected override Window CreateWindow(IActivationState? activationState)
-    {
-        return new Window(new MainPage());
-    }
 }

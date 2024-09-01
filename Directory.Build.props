@@ -1,6 +1,7 @@
 <Project>
 
   <PropertyGroup>
+    <TargetFrameworks>net8.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 

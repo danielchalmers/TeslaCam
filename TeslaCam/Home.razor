@@ -23,6 +23,7 @@
             <div class="main-video">
                 <CameraView CamClip="@CurrentClip" CameraPath="front" />
             </div>
+
             <div class="mini-videos">
                 <CameraView CamClip="@CurrentClip" CameraPath="front" CameraName="Front" Mini="true" />
                 <CameraView CamClip="@CurrentClip" CameraPath="back" CameraName="Back" Mini="true" />
@@ -36,9 +37,9 @@
 @code {
     private CamClip CurrentClip { get; set; }
     private string ErrorMessage { get; set; }
-    private List<CamClip> Clips { get; set; } = new List<CamClip>();
+    private List<CamClip> Clips { get; set; } = [];
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         var storages = new HashSet<CamStorage>();
 

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Win32;
 using Serilog;
 using TeslaCam.Data;
 
@@ -53,6 +54,34 @@ public partial class MainWindow : Window
             {
                 Clips.Add(clips);
             }
+        }
+
+        CurrentClip = Clips.FirstOrDefault();
+    }
+
+    private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        Log.Debug($"User is selecting a folder");
+
+        var dialog = new OpenFolderDialog();
+        dialog.Title = "Select a folder containing dashcam footage";
+
+        var result = dialog.ShowDialog();
+
+        if (result != true)
+        {
+            Log.Debug($"No folder was selected");
+            return;
+        }
+
+        Clips.Clear();
+
+        var storage = new CamStorage(dialog.FolderName);
+        Log.Debug($"Loading clips from {dialog.FolderName}");
+
+        foreach (var clip in storage.Clips)
+        {
+            Clips.Add(clip);
         }
 
         CurrentClip = Clips.FirstOrDefault();

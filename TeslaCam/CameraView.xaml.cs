@@ -69,7 +69,8 @@ public partial class CameraView : UserControl
     private static void OnCamClipChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var control = (CameraView)d;
-        control._currentChunk = (e.NewValue as CamClip).Chunks.First;
+
+        control._currentChunk = (e.NewValue as CamClip)?.Chunks?.First;
         control.PlayCurrentChunk();
     }
 

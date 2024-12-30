@@ -15,26 +15,40 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!--  Display all clips with thumbnails  -->
-        <ListView Grid.Column="0"
-                 ItemsSource="{Binding Clips}"
-                 SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding ThumbnailPath}"
-                               Width="128"
-                               Stretch="Uniform" />
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="16"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!--  Dashcam folder picker  -->
+            <Button Grid.Row="0"
+                    Content="Select Folder"
+                    HorizontalAlignment="Stretch"
+                    Click="OpenFolderButton_Click" />
 
-                        <TextBlock Text="{Binding}"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   VerticalAlignment="Center"
-                                   Margin="8,0,0,0" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            <!--  Display all clips with thumbnails  -->
+            <ListView Grid.Row="2"
+                      ItemsSource="{Binding Clips}"
+                      SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding ThumbnailPath}"
+                                   Width="128"
+                                   Stretch="Uniform" />
+
+                            <TextBlock Text="{Binding}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0,0,0" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
         <Viewbox Grid.Column="1" Stretch="Uniform">
             <Grid Height="960">

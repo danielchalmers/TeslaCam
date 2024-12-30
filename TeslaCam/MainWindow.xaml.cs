@@ -74,9 +74,21 @@ public partial class MainWindow : Window
             return;
         }
 
+        CurrentClip = null;
         Clips.Clear();
 
-        var storage = new CamStorage(dialog.FolderName);
+        CamStorage storage;
+        try
+        {
+            storage = new CamStorage(dialog.FolderName);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Log.Debug(ex, "Access denied");
+            ErrorMessage = "Access denied. Please run the application as an administrator.";
+            return;
+        }
+
         Log.Debug($"Loading clips from {dialog.FolderName}");
 
         foreach (var clip in storage.Clips)

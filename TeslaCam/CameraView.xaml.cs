@@ -83,7 +83,13 @@ public partial class CameraView : UserControl
     private void PlayCurrentChunk()
     {
         if (_currentChunk?.Value == null)
+        {
+            _currentElement.Stop();
+            _currentElement.Visibility = Visibility.Collapsed;
+            _nextElement.Stop();
+            _nextElement.Visibility = Visibility.Collapsed;
             return;
+        }
 
         var camFile = _currentChunk.Value.Files.GetValueOrDefault(CameraPath);
         if (camFile == null)
@@ -103,14 +109,14 @@ public partial class CameraView : UserControl
         _currentElement.Visibility = Visibility.Visible;
         _nextElement.Visibility = Visibility.Collapsed;
 
-        Log.Debug($"{CameraPath}: {_currentChunk.Value.Timestamp}");
+        Log.Debug($"{CameraPath}: {_currentChunk?.Value?.Timestamp}");
         FileStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)
     {
         Log.Debug($"{CameraPath}: view 1 ended");
-        if (_currentChunk.Next == null)
+        if (_currentChunk?.Next == null)
         {
             return;
         }
@@ -129,7 +135,7 @@ public partial class CameraView : UserControl
     private void MediaElement2_MediaEnded(object sender, RoutedEventArgs e)
     {
         Log.Debug($"{CameraPath}: view 2 ended");
-        if (_currentChunk.Next == null)
+        if (_currentChunk?.Next == null)
         {
             return;
         }

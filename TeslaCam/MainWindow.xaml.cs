@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
@@ -27,30 +26,18 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = this;
 
-        var _storages = new HashSet<CamStorage>();
+        var storages = CamStorage.FindStorages();
 
-        // Local directory.
-        if (Directory.Exists("./TeslaCam"))
-        {
-            _storages.Add(new CamStorage("./TeslaCam"));
-        }
-
-        // USB sticks.
-        foreach (var storage in CamStorage.GetSticks())
-        {
-            _storages.Add(storage);
-        }
-
-        if (_storages.Count == 0)
+        if (storages.Count == 0)
         {
             Log.Debug("No storages found");
             ErrorMessage = "No TeslaCam folders found";
         }
         else
         {
-            Log.Debug($"Found storages: {string.Join(", ", _storages)}");
+            Log.Debug($"Found storages: {string.Join(", ", storages)}");
 
-            foreach (var clips in _storages.SelectMany(x => x.Clips))
+            foreach (var clips in storages.SelectMany(x => x.Clips))
             {
                 Clips.Add(clips);
             }
@@ -74,6 +61,8 @@ public partial class MainWindow : Window
             return;
         }
 
+        // The user has committed at this point, even if it doesn't end up loading. Lets clear the current state.
+        ErrorMessage = null;
         CurrentClip = null;
         Clips.Clear();
 

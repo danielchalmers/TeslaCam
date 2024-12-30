@@ -12,31 +12,46 @@ public partial record class CamStorage
     }
 
     /// <summary>
-    /// Enumerates all USB sticks with a TeslaCam folder.
+    /// Name of the folder that contains the dashcam clips.
     /// </summary>
-    public static IEnumerable<CamStorage> GetSticks()
-    {
-        var drives = DriveInfo.GetDrives();
+    public static string ExpectedName { get; } = "TeslaCam";
 
+    /// <summary>
+    /// Find dashcam storage locations on USB sticks or the local folder.
+    /// </summary>
+    public static IReadOnlySet<CamStorage> FindStorages() =>
+        FindStoragePaths().Select(path => new CamStorage(path)).ToHashSet();
+
+    private static IEnumerable<string> FindStoragePaths()
+    {
+        if (Directory.Exists(ExpectedName))
+        {
+            yield return Path.GetFullPath(ExpectedName);
+        }
+
+        var drives = DriveInfo.GetDrives();
         foreach (var drive in drives)
         {
-            var shouldIncludeDrive = drive.DriveType == DriveType.Removable && drive.IsReady;
+            var include = drive.DriveType == DriveType.Removable && drive.IsReady;
 
 #if DEBUG
-            shouldIncludeDrive = true;
+            // We only include sticks as to not traverse the entire filesystem of regular drives, but it's useful to include them while debugging.
+            include = true;
 #endif
 
-            if (shouldIncludeDrive)
+            if (!include)
             {
-                var teslaCamPath = Path.Combine(drive.RootDirectory.FullName, "TeslaCam");
-
-                if (!Directory.Exists(teslaCamPath))
-                {
-                    continue;
-                }
-
-                yield return new CamStorage(teslaCamPath);
+                continue;
             }
+
+            var expectedFolderPath = Path.Combine(drive.RootDirectory.FullName, ExpectedName);
+
+            if (!Directory.Exists(expectedFolderPath))
+            {
+                continue;
+            }
+
+            yield return expectedFolderPath;
         }
     }
 

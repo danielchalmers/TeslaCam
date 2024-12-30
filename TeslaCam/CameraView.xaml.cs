@@ -115,11 +115,13 @@ public partial class CameraView : UserControl
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)
     {
-        Log.Debug($"{CameraPath}: view 1 ended");
         if (_currentChunk?.Next == null)
         {
+            Log.Debug($"{CameraPath}: view 1 ended with no chunks left");
             return;
         }
+
+        Log.Debug($"{CameraPath}: view 1 ended; playing next chunk");
 
         NextChunk();
         _currentElement = MediaElement2;
@@ -134,11 +136,13 @@ public partial class CameraView : UserControl
 
     private void MediaElement2_MediaEnded(object sender, RoutedEventArgs e)
     {
-        Log.Debug($"{CameraPath}: view 2 ended");
         if (_currentChunk?.Next == null)
         {
+            Log.Debug($"{CameraPath}: view 2 ended with no chunks left");
             return;
         }
+
+        Log.Debug($"{CameraPath}: view 2 ended; playing next chunk");
 
         NextChunk();
         _currentElement = MediaElement1;
@@ -155,7 +159,7 @@ public partial class CameraView : UserControl
     {
         if (Mini)
         {
-            Height = 192; // 1/5 of a HW3 1280x960 cam.
+            Height = 192; // 1/5 of a full cam.
             NameTextBlock.Visibility = Visibility.Visible;
         }
         else

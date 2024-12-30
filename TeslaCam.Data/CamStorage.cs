@@ -8,7 +8,7 @@ public partial record class CamStorage
     public CamStorage(string path)
     {
         DirectoryPath = Path.GetFullPath(path);
-        Clips = CamClip.GetClipFolders(path).ToHashSet();
+        Clips = CamClip.GetClipFolders(path).OrderByDescending(c => c.Timestamp).ToHashSet();
     }
 
     /// <summary>

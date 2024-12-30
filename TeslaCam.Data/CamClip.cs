@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -59,5 +60,17 @@ public partial record class CamClip
         return camEvent;
     }
 
-    public override string ToString() => $"{Timestamp}";
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+        builder.Append(Timestamp);
+
+        if (Event is not null)
+        {
+            builder.AppendLine();
+            builder.Append(Event.City);
+        }
+
+        return builder.ToString();
+    }
 }

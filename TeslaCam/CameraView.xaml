@@ -9,7 +9,7 @@
         <MediaElement x:Name="MediaElement1"
                       MediaOpened="MediaElement_MediaOpened"
                       MediaEnded="MediaElement1_MediaEnded"
-                      MediaFailed="MediaElement2_MediaFailed"
+                      MediaFailed="MediaElement1_MediaFailed"
                       Stretch="Uniform"
                       LoadedBehavior="Manual"
                       UnloadedBehavior="Manual"

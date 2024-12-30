@@ -6,6 +6,9 @@ inputs:
   version:
     description: 'Version number for the app'
     default: '0.0.0'
+  rids:
+    description: 'Runtime identifiers for the build'
+    default: 'win-x64 win-arm64'
 
 runs:
   using: "composite"
@@ -22,19 +25,20 @@ runs:
 
     - name: Publish
       shell: bash
-      run: dotnet publish ./TeslaCam/TeslaCam.csproj -o "portable" -c Release -f net9.0-windows -r win-x64 --self-contained -p:PublishSingleFile=true -p:Version=${{ inputs.version }}
+      run: |
+        for rid in ${{ inputs.rids }}; do
+          dotnet publish ./TeslaCam/TeslaCam.csproj -o "publish/$rid" -c Release -f net9.0-windows -r $rid --self-contained -p:PublishSingleFile=true -p:Version=${{ inputs.version }}
+        done
 
     - name: Compress
       shell: pwsh
-      run: Compress-Archive "portable/*" "portable.zip"
+      run: |
+        for rid in ${{ inputs.rids }}; do
+          Compress-Archive "publish/$rid/*" "portable-$rid.zip"
+        done
 
-    # - name: Create installer
-    #   shell: bash
-    #   run: |
-    #     dotnet tool install --global wix --version 5.0.1
-    #     wix build Product.wxs -o "publish/Install TeslaCam Player.msi"
-
-    - uses: actions/upload-artifact@v4
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
       with:
-        path: |
-          "portable.zip"
+        name: portable-artifacts
+        path: "portable-*.zip"

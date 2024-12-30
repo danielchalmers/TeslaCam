@@ -44,7 +44,7 @@ public partial class MainWindow : Window
         if (_storages.Count == 0)
         {
             Log.Debug("No storages found");
-            ErrorMessage = "No TeslaCam folders found. Insert the USB stick and restart.";
+            ErrorMessage = "No TeslaCam folders found";
         }
         else
         {
@@ -85,7 +85,7 @@ public partial class MainWindow : Window
         catch (UnauthorizedAccessException ex)
         {
             Log.Debug(ex, "Access denied");
-            ErrorMessage = "Access denied. Please run the application as an administrator.";
+            ErrorMessage = "Access denied to folder";
             return;
         }
 

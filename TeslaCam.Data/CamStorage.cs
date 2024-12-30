@@ -20,7 +20,13 @@ public partial record class CamStorage
 
         foreach (var drive in drives)
         {
-            if (drive.DriveType == DriveType.Removable && drive.IsReady)
+            var shouldIncludeDrive = drive.DriveType == DriveType.Removable && drive.IsReady;
+
+#if DEBUG
+            shouldIncludeDrive = true;
+#endif
+
+            if (shouldIncludeDrive)
             {
                 var teslaCamPath = Path.Combine(drive.RootDirectory.FullName, "TeslaCam");
 

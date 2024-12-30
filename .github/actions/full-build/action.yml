@@ -33,9 +33,10 @@ runs:
     - name: Compress
       shell: pwsh
       run: |
-        for rid in ${{ inputs.rids }}; do
-          Compress-Archive "publish/$rid/*" "TeslaCamPlayer-${{ inputs.version }}-$rid.zip"
-        done
+        $rids = "${{ inputs.rids }}".Split(" ")
+        foreach ($rid in $rids) {
+          Compress-Archive -Path "publish/$rid/*" -DestinationPath "TeslaCamPlayer-${{ inputs.version }}-$rid.zip"
+        }
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

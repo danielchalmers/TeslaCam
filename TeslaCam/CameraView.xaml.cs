@@ -155,7 +155,7 @@ public partial class CameraView : UserControl
     {
         if (Mini)
         {
-            Height = 192;
+            Height = 192; // 1/5 of a HW3 1280x960 cam.
             NameTextBlock.Visibility = Visibility.Visible;
         }
         else

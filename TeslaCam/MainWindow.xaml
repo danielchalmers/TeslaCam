@@ -11,17 +11,18 @@
         MinHeight="600">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="350" />
+            <ColumnDefinition Width="8" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="16"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            
+
             <!--  Dashcam folder picker  -->
             <Button Grid.Row="0"
                     Content="Select Folder"
@@ -50,7 +51,8 @@
             </ListView>
         </Grid>
 
-        <Viewbox Grid.Column="1" Stretch="Uniform">
+        <Viewbox Grid.Column="2" Stretch="Uniform">
+            <!--  Camera: HW3 = 1280x960, HW4 = 2896x1876. We use HW3 as the base resolution and scale it for other aspect ratios.  -->
             <Grid Height="960">
                 <!--  Main feed covering the whole view  -->
                 <local:CameraView CamClip="{Binding CurrentClip}" CameraPath="front" />

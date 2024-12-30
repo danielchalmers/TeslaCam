@@ -2,7 +2,6 @@
 using Serilog;
 
 namespace TeslaCam;
-
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>

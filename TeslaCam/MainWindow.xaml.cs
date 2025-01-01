@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
+﻿using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 using Serilog;
@@ -13,13 +12,13 @@ namespace TeslaCam;
 [ObservableObject]
 public partial class MainWindow : Window
 {
+    private readonly List<CamClip> _clips = [];
+
     [ObservableProperty]
     private CamClip _currentClip;
 
     [ObservableProperty]
     private string _errorMessage;
-
-    public ObservableCollection<CamClip> Clips { get; } = [];
 
     public MainWindow()
     {
@@ -39,15 +38,20 @@ public partial class MainWindow : Window
             {
                 Log.Information($"Found root folder: {root}");
                 var storage = CamStorage.Traverse(root);
-                foreach (var clips in storage.Clips)
-                {
-                    Clips.Add(clips);
-                }
+                _clips.AddRange(storage.Clips);
             }
         }
 
         CurrentClip = Clips.FirstOrDefault();
     }
+
+    /// <summary>
+    /// A proxy for the clips list that handles ordering and filtering.
+    /// </summary>
+    public IReadOnlyList<CamClip> Clips => _clips
+        .OrderByDescending(x => x.Timestamp) // Order newest by timestamp, either from folder name or event data.
+        .ThenBy(x => x.Name) // If the timestamp couldn't be found the clip will go to the bottom where we then order by the folder name.
+        .ToList();
 
     partial void OnCurrentClipChanging(CamClip oldValue, CamClip newValue)
     {
@@ -74,7 +78,8 @@ public partial class MainWindow : Window
         // The user has committed at this point, even if it doesn't end up loading. Lets clear the current state.
         ErrorMessage = null;
         CurrentClip = null;
-        Clips.Clear();
+        _clips.Clear();
+        OnPropertyChanged(nameof(Clips));
 
         CamStorage storage;
         try
@@ -88,10 +93,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        foreach (var clip in storage.Clips)
-        {
-            Clips.Add(clip);
-        }
+        _clips.AddRange(storage.Clips);
+        OnPropertyChanged(nameof(Clips));
 
         CurrentClip = Clips.FirstOrDefault();
     }

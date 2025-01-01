@@ -60,4 +60,13 @@ public record class CamEvent
             return null;
         }
     }
+
+    public static CamEvent ParseFromFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+            return null;
+
+        var json = File.ReadAllText(filePath);
+        return Deserialize(json);
+    }
 }

@@ -24,7 +24,7 @@ public partial record class CamStorage
     public CamStorage(string path, IEnumerable<CamClip> clips)
     {
         FullPath = Path.GetFullPath(path);
-        Clips = clips.OrderByDescending(c => c.Timestamp).ToHashSet();
+        Clips = clips.ToHashSet();
     }
 
     /// <summary>

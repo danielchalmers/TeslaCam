@@ -15,7 +15,12 @@ public partial record class CamClip
     public string FullPath { get; private init; }
 
     /// <summary>
-    /// The timestamp parsed from the folder name if it's available.
+    /// The title from the folder name or timestamp.
+    /// </summary>
+    public string Name { get; private init; }
+
+    /// <summary>
+    /// The timestamp parsed from the folder name title if it's available.
     /// </summary>
     public DateTime Timestamp { get; private init; }
 
@@ -34,13 +39,47 @@ public partial record class CamClip
     /// </summary>
     public string ThumbnailPath { get; private init; }
 
-    public CamClip(string path, DateTime timestamp, LinkedList<CamClipChunk> chunks, CamEvent camEvent)
+    public CamClip(string path, string name, DateTime timestamp, LinkedList<CamClipChunk> chunks, CamEvent camEvent)
     {
         FullPath = Path.GetFullPath(path);
+        Name = name;
         Timestamp = timestamp;
         Chunks = chunks;
         Event = camEvent;
         ThumbnailPath = Path.Combine(FullPath, "thumb.png");
+    }
+
+    public static CamClip MapClip(string directory)
+    {
+        var eventData = CamEvent.ParseFromFile(Path.Combine(directory, "event.json"));
+        var title = Path.GetFileName(directory);
+        DateTime timestamp = default;
+
+        // If the folder name is in the default format we can parse the date to make it look better; otherwise we use the renamed title.
+        var match = FolderNameRegex().Match(title);
+        if (match.Success)
+        {
+            timestamp = DateTime.ParseExact(match.Groups["date"].Value, "yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
+            title = timestamp.ToString();
+        }
+        else
+        {
+            // We can try to get the timestamp from the event data if the folder name is missing it.
+            if (eventData is not null && eventData.Timestamp != default)
+            {
+                timestamp = eventData.Timestamp;
+            }
+        }
+
+        var chunks = CamClipChunk.GetChunks(directory);
+
+        if (chunks.Count == 0)
+        {
+            // Folder does not contain any valid chunks and serves no purpose.
+            return null;
+        }
+
+        return new(directory, title, timestamp, chunks, eventData);
     }
 
     /// <summary>
@@ -49,26 +88,16 @@ public partial record class CamClip
     public static IEnumerable<CamClip> FindClips(string rootDirectory)
     {
         var directories = Directory.GetDirectories(rootDirectory, "*", SearchOption.AllDirectories);
+
         foreach (var directory in directories)
         {
-            var match = FolderNameRegex().Match(Path.GetFileName(directory));
-            if (match.Success)
+            var clip = MapClip(directory);
+
+            if (clip is not null)
             {
-                var timestamp = DateTime.ParseExact(match.Groups["date"].Value, "yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
-                var chunks = CamClipChunk.GetChunks(directory);
-                var eventData = GetEventData(Path.Combine(directory, "event.json"));
-                yield return new(directory, timestamp, chunks, eventData);
+                yield return clip;
             }
         }
-    }
-
-    private static CamEvent GetEventData(string filePath)
-    {
-        if (!File.Exists(filePath))
-            return null;
-
-        var json = File.ReadAllText(filePath);
-        return CamEvent.Deserialize(json);
     }
 
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]
@@ -79,7 +108,8 @@ public partial record class CamClip
         get
         {
             var builder = new StringBuilder();
-            builder.Append(Timestamp);
+
+            builder.Append(Name);
 
             if (Event?.City is not null)
             {
@@ -91,5 +121,5 @@ public partial record class CamClip
         }
     }
 
-    public override string ToString() => $"{Timestamp}";
+    public override string ToString() => $"{Name}";
 }

@@ -36,6 +36,7 @@
                                    Stretch="Uniform" />
 
                             <TextBlock Text="{Binding Summary}"
+                                       ToolTip="{Binding Summary}"
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center"

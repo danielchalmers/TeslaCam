@@ -74,7 +74,7 @@ public partial class MainWindow : Window
         catch (UnauthorizedAccessException ex)
         {
             Log.Debug(ex, "Access denied");
-            ErrorMessage = "Access denied to folder";
+            ErrorMessage = "Access to folder denied";
             return;
         }
 

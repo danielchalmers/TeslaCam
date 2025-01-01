@@ -16,26 +16,41 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="8" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <!--  Dashcam folder picker  -->
-            <Button Grid.Row="0"
-                    Content="Select Folder"
+        <!--  Sidebar  -->
+        <StackPanel Grid.Column="0">
+            <!--  Folder picker  -->
+            <Button Content="Select Folder"
                     HorizontalAlignment="Stretch"
                     Click="OpenFolderButton_Click" />
 
+            <!--  Error message  -->
+            <TextBlock Text="{Binding ErrorMessage}"
+                       Foreground="Red"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap"
+                       Margin="0,8,0,0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
             <!--  Display all clips with thumbnails  -->
-            <ListView Grid.Row="2"
-                      ItemsSource="{Binding Clips}"
-                      SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
+            <ListView ItemsSource="{Binding Clips}"
+                      SelectedItem="{Binding CurrentClip, Mode=TwoWay}"
+                      Margin="0,8,0,0">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" Height="96">
                             <Image Source="{Binding ThumbnailPath}"
                                    Width="128"
                                    Stretch="Uniform" />
@@ -49,7 +64,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        </Grid>
+        </StackPanel>
 
         <Viewbox Grid.Column="2" Stretch="Uniform">
             <!--  Camera: HW3 = 1280x960, HW4 = 2896x1876.  -->
@@ -57,14 +72,6 @@
             <Grid Height="960">
                 <!--  Main feed covering the whole view  -->
                 <local:CameraView CamClip="{Binding CurrentClip}" CameraPath="front" />
-
-                <!--  Error message  -->
-                <TextBlock Text="{Binding ErrorMessage}"
-                           Foreground="Red"
-                           FontSize="36"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           TextWrapping="Wrap" />
 
                 <!--  Overlay for mini camera views  -->
                 <Grid Background="Transparent" Margin="24">

@@ -73,4 +73,12 @@ public static class CamEventTests
         // Assert
         camEvent.Should().BeNull();
     }
+
+    [Fact]
+    public static void FromFile()
+    {
+        var camEvent = CamEvent.ParseFromFile("Mocks/2023-02-23_14-16-15/event.json");
+
+        camEvent.Should().NotBeNull();
+    }
 }

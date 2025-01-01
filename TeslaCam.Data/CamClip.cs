@@ -60,7 +60,7 @@ public partial record class CamClip
         if (match.Success)
         {
             timestamp = DateTime.ParseExact(match.Groups["date"].Value, "yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
-            title = timestamp.ToString();
+            title = timestamp.ToString(CultureInfo.InvariantCulture);
         }
         else
         {

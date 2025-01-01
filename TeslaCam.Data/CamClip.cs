@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace TeslaCam.Data;
@@ -45,19 +44,13 @@ public partial record class CamClip
         }
     }
 
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
-    {
-        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString,
-    };
-
     public static CamEvent GetEventData(string filePath)
     {
         if (!File.Exists(filePath))
             return null;
 
         var json = File.ReadAllText(filePath);
-        var camEvent = JsonSerializer.Deserialize<CamEvent>(json, JsonSerializerOptions);
-        return camEvent;
+        return CamEvent.Deserialize(json);
     }
 
     public override string ToString()

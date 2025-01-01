@@ -12,7 +12,7 @@ public record class CamEvent
     /// The ISO 8601 timestamp indicating when the event occurred.
     /// </summary>
     [JsonPropertyName("timestamp")]
-    public required DateTime Timestamp { get; init; }
+    public DateTime Timestamp { get; init; }
 
     /// <summary>
     /// The nearest city to the event, as determined by the vehicle's GPS system.

@@ -12,7 +12,7 @@ public record class CamClipChunk
     public CamClipChunk(DateTime timestamp, IEnumerable<CamFile> files)
     {
         Timestamp = timestamp;
-        Files = files.ToDictionary(f => f.CameraName);
+        Files = files.ToDictionary(f => f.Camera);
     }
 
     /// <summary>
@@ -20,9 +20,9 @@ public record class CamClipChunk
     /// </summary>
     public static LinkedList<CamClipChunk> GetChunks(string directoryPath)
     {
-        var chunks = CamFile.GetCamFiles(directoryPath)
+        var chunks = CamFile.FindCamFiles(directoryPath)
             .GroupBy(f => f.Timestamp)
-            .Where(g => g.Any(x => x.CameraName == "front")) // Must have a front camera clip to be a valid bundle.
+            .Where(g => g.Any(x => x.Camera == "front")) // Must have a front camera clip to be a valid chunk.
             .OrderBy(g => g.Key)
             .Select(g => new CamClipChunk(g.Key, g));
 

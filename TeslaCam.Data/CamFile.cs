@@ -11,7 +11,7 @@ public partial record class CamFile
     /// <summary>
     /// The path to the media file.
     /// </summary>
-    public string FilePath { get; private init; }
+    public string FullPath { get; private init; }
 
     /// <summary>
     /// The timestamp of the media file.
@@ -21,29 +21,19 @@ public partial record class CamFile
     /// <summary>
     /// The name of the camera that recorded the media file.
     /// </summary>
-    public string CameraName { get; private init; }
+    public string Camera { get; private init; }
 
-    public CamFile(string filePath)
+    public CamFile(string path, DateTime timestamp, string camera)
     {
-        FilePath = Path.GetFullPath(filePath);
-
-        var match = FileNameRegex().Match(Path.GetFileName(filePath));
-        if (!match.Success)
-        {
-            throw new ArgumentException("Invalid file name format");
-        }
-
-        Timestamp = DateTime.ParseExact(match.Groups["date"].Value, "yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
-        CameraName = match.Groups["camera"].Value;
+        FullPath = Path.GetFullPath(path);
+        Timestamp = timestamp;
+        Camera = camera;
     }
-
-    [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})-(?<camera>.+)\.mp4")]
-    private static partial Regex FileNameRegex();
 
     /// <summary>
     /// Find all the media files in the directory that match the typical format.
     /// </summary>
-    public static IEnumerable<CamFile> GetCamFiles(string rootDirectory)
+    public static IEnumerable<CamFile> FindCamFiles(string rootDirectory)
     {
         var files = Directory.EnumerateFiles(rootDirectory, "*", SearchOption.TopDirectoryOnly);
 
@@ -52,10 +42,15 @@ public partial record class CamFile
             var match = FileNameRegex().Match(Path.GetFileName(file));
             if (match.Success)
             {
-                yield return new CamFile(file);
+                var timestamp = DateTime.ParseExact(match.Groups["date"].Value, "yyyy-MM-dd_HH-mm-ss", CultureInfo.InvariantCulture);
+                var camera = match.Groups["camera"].Value;
+                yield return new CamFile(file, timestamp, camera);
             }
         }
     }
 
-    public override string ToString() => $"{CameraName}";
+    [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})-(?<camera>.+)\.mp4")]
+    private static partial Regex FileNameRegex();
+
+    public override string ToString() => $"{Camera}";
 }

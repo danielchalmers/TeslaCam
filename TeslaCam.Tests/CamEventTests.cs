@@ -38,35 +38,18 @@ public static class CamEventTests
     {
         var json = """
         {
-            "timestamp":"2023-06-03T15:54:27"
         }
         """;
 
         var camEvent = CamEvent.Deserialize(json);
 
         camEvent.Should().NotBeNull();
-        camEvent.Timestamp.Should().Be(new DateTime(2023, 6, 3, 15, 54, 27));
+        camEvent.Timestamp.Should().Be(default);
         camEvent.City.Should().BeNull();
         camEvent.EstLat.Should().Be(default);
         camEvent.EstLon.Should().Be(default);
         camEvent.Reason.Should().BeNull();
         camEvent.Camera.Should().Be(default);
-    }
-
-    [Fact]
-    public static void Deserialization_TimestampRequired()
-    {
-        var json = """
-        {
-            "city":"Taylor",
-            "est_lat":"30.6075",
-            "est_lon":"-97.4812",
-            "reason":"user_interaction_honk",
-            "camera":"0"
-        }
-        """;
-
-        CamEvent.Deserialize(json).Should().BeNull();
     }
 
     [Fact]

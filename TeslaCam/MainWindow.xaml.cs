@@ -26,20 +26,23 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = this;
 
-        var storages = CamStorage.FindStorages();
+        var roots = CamStorage.FindCommonRoots().ToList();
 
-        if (storages.Count == 0)
+        if (roots.Count == 0)
         {
-            Log.Debug("No storages found");
+            Log.Debug("No common roots found");
             ErrorMessage = "No TeslaCam folders found";
         }
         else
         {
-            Log.Debug($"Found storages: {string.Join(", ", storages)}");
-
-            foreach (var clips in storages.SelectMany(x => x.Clips))
+            foreach (var root in roots)
             {
-                Clips.Add(clips);
+                Log.Debug($"Found root: {root}");
+                var storage = CamStorage.Traverse(root);
+                foreach (var clips in storage.Clips)
+                {
+                    Clips.Add(clips);
+                }
             }
         }
 
@@ -61,6 +64,8 @@ public partial class MainWindow : Window
             return;
         }
 
+        Log.Debug($"Using new root: {dialog.FolderName}");
+
         // The user has committed at this point, even if it doesn't end up loading. Lets clear the current state.
         ErrorMessage = null;
         CurrentClip = null;
@@ -69,7 +74,7 @@ public partial class MainWindow : Window
         CamStorage storage;
         try
         {
-            storage = new CamStorage(dialog.FolderName);
+            storage = CamStorage.Traverse(dialog.FolderName);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -77,8 +82,6 @@ public partial class MainWindow : Window
             ErrorMessage = "Access to folder denied";
             return;
         }
-
-        Log.Debug($"Loading clips from {dialog.FolderName}");
 
         foreach (var clip in storage.Clips)
         {

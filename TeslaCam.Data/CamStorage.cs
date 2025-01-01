@@ -9,31 +9,34 @@ public partial record class CamStorage
     /// <summary>
     /// The full path to the root folder.
     /// </summary>
-    public string DirectoryPath { get; private init; }
+    public string FullPath { get; private init; }
 
     /// <summary>
     /// Every clip found recursively in the storage, ordered by timestamp.
     /// </summary>
     public IReadOnlySet<CamClip> Clips { get; private init; }
 
-    public CamStorage(string path)
-    {
-        DirectoryPath = Path.GetFullPath(path);
-        Clips = CamClip.GetClipFolders(path).OrderByDescending(c => c.Timestamp).ToHashSet();
-    }
-
     /// <summary>
     /// Typical name of the folder that ultimately contains the dashcam clips.
     /// </summary>
     public static string ExpectedName { get; } = "TeslaCam";
 
-    /// <summary>
-    /// Find dashcam storage locations on USB sticks or the local folder.
-    /// </summary>
-    public static IReadOnlySet<CamStorage> FindStorages() =>
-        FindStoragePaths().Select(path => new CamStorage(path)).ToHashSet();
+    public CamStorage(string path, IEnumerable<CamClip> clips)
+    {
+        FullPath = Path.GetFullPath(path);
+        Clips = clips.OrderByDescending(c => c.Timestamp).ToHashSet();
+    }
 
-    private static IEnumerable<string> FindStoragePaths()
+    /// <summary>
+    /// Maps out the spcefied path and constructs a repreesntation of its structure.
+    /// </summary>
+    public static CamStorage Traverse(string path)
+    {
+        var clips = CamClip.FindClips(path);
+        return new CamStorage(path, clips);
+    }
+
+    public static IEnumerable<string> FindCommonRoots()
     {
         if (Directory.Exists(ExpectedName))
         {
@@ -66,5 +69,5 @@ public partial record class CamStorage
         }
     }
 
-    public override string ToString() => $"{Clips.Count} clips ({Path.GetPathRoot(DirectoryPath)})";
+    public override string ToString() => $"{Clips.Count} clips ({Path.GetPathRoot(FullPath)})";
 }

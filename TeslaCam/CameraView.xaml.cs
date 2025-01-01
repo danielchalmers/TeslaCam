@@ -95,7 +95,7 @@ public partial class CameraView : UserControl
         if (camFile == null)
             return;
 
-        _currentElement.Source = new Uri(camFile.FilePath);
+        _currentElement.Source = new Uri(camFile.FullPath);
         _currentElement.Play();
     }
 

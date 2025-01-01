@@ -4,7 +4,7 @@
 /// The root folder.
 /// Typically contains <c>SavedClips</c>, <c>SentryClips</c>, and <c>RecentClips</c> but that's not a requirement.
 /// </summary>
-public partial record class CamStorage
+public record class CamStorage
 {
     /// <summary>
     /// The full path to the root folder.
@@ -28,12 +28,12 @@ public partial record class CamStorage
     }
 
     /// <summary>
-    /// Maps out the spcefied path and constructs a repreesntation of its structure.
+    /// Traverses the specified path and constructs an object represntation of its structure.
     /// </summary>
-    public static CamStorage Traverse(string path)
+    public static CamStorage Map(string path)
     {
         var clips = CamClip.FindClips(path);
-        return new CamStorage(path, clips);
+        return new(path, clips);
     }
 
     public static IEnumerable<string> FindCommonRoots()
@@ -49,7 +49,7 @@ public partial record class CamStorage
             var include = drive.DriveType == DriveType.Removable && drive.IsReady;
 
 #if DEBUG
-            // We only include sticks as to not traverse the entire filesystem of regular drives, but it's useful to include them while debugging.
+            // We only check USB sticks as to not wake regular drives, but it's useful to include them while debugging.
             include = true;
 #endif
 
@@ -62,6 +62,7 @@ public partial record class CamStorage
 
             if (!Directory.Exists(expectedFolderPath))
             {
+                // The folder does not exist at the standard location. We won't search any further.
                 continue;
             }
 

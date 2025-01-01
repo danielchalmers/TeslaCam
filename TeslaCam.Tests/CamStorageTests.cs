@@ -8,7 +8,7 @@ public static class CamStorageTests
     [Fact]
     public static void TraverseFindsAllClips()
     {
-        var storage = CamStorage.Traverse(".");
+        var storage = CamStorage.Map(".");
 
         storage.Clips.Count.Should().Be(3); // Ignores the "No Camera Files" folder.
     }
@@ -18,7 +18,7 @@ public static class CamStorageTests
     [InlineData("Mocks/Custom Folder Name", "Custom Folder Name")]
     public static void ClipName(string path, string expectedName)
     {
-        var clip = CamClip.MapClip(path);
+        var clip = CamClip.Map(path);
 
         clip.Should().NotBeNull();
         clip.Name.Should().Be(expectedName);
@@ -27,7 +27,7 @@ public static class CamStorageTests
     [Fact]
     public static void MapClipWithNonstandardNameFallsBackToEventDataForTimestamp()
     {
-        var clip = CamClip.MapClip("Mocks/Custom Folder Name");
+        var clip = CamClip.Map("Mocks/Custom Folder Name");
 
         clip.Event.Should().NotBeNull();
         clip.Timestamp.Should().Be(clip.Event.Timestamp);
@@ -39,7 +39,7 @@ public static class CamStorageTests
     [InlineData("Mocks/No Front Angle", 0)]
     public static void FindsAllChunks(string path, int expectedCount)
     {
-        var chunks = CamClipChunk.GetChunks(path);
+        var chunks = CamChunk.Map(path);
 
         chunks.Count.Should().Be(expectedCount);
     }
@@ -48,7 +48,7 @@ public static class CamStorageTests
     [InlineData("Mocks/2023-02-23_14-16-15")]
     public static void ChunksAreInCorrectOrder(string path)
     {
-        var chunks = CamClipChunk.GetChunks(path);
+        var chunks = CamChunk.Map(path);
 
         var node = chunks.First;
         while (node?.Next is not null)
@@ -67,7 +67,7 @@ public static class CamStorageTests
     [InlineData("Mocks/Missing Left Camera Angle on Second Chunk", 7)]
     public static void FindsAllFiles(string path, int expectedCount)
     {
-        var files = CamFile.FindCamFiles(path).ToList();
+        var files = CamFile.FindFiles(path).ToList();
 
         files.Count.Should().Be(expectedCount);
     }

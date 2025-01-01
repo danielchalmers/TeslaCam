@@ -36,13 +36,16 @@ public static class CamEventTests
     [Fact]
     public static void Deserialization_OptionalProperties()
     {
+        // Arrange
         var json = """
         {
         }
         """;
 
+        // Act
         var camEvent = CamEvent.Deserialize(json);
 
+        // Assert
         camEvent.Should().NotBeNull();
         camEvent.Timestamp.Should().Be(default);
         camEvent.City.Should().BeNull();
@@ -77,7 +80,7 @@ public static class CamEventTests
     [Fact]
     public static void FromFile()
     {
-        var camEvent = CamEvent.ParseFromFile("Mocks/2023-02-23_14-16-15/event.json");
+        var camEvent = CamEvent.FromFile("Mocks/2023-02-23_14-16-15/event.json");
 
         camEvent.Should().NotBeNull();
     }

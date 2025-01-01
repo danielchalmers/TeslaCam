@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace TeslaCam.Data;
 
 /// <summary>
-/// A folder containing a collection of <see cref="CamClipChunk"/>s that make up a single continuous dashcam clip.
+/// A folder containing a collection of <see cref="CamChunk"/>s that make up a single continuous dashcam clip.
 /// </summary>
 public partial record class CamClip
 {
@@ -27,7 +27,7 @@ public partial record class CamClip
     /// <summary>
     /// The ordered list of chunks that make up the clip as a whole.
     /// </summary>
-    public LinkedList<CamClipChunk> Chunks { get; private init; }
+    public LinkedList<CamChunk> Chunks { get; private init; }
 
     /// <summary>
     /// The event data associated with this clip.
@@ -39,7 +39,7 @@ public partial record class CamClip
     /// </summary>
     public string ThumbnailPath { get; private init; }
 
-    public CamClip(string path, string name, DateTime timestamp, LinkedList<CamClipChunk> chunks, CamEvent camEvent)
+    public CamClip(string path, string name, DateTime timestamp, LinkedList<CamChunk> chunks, CamEvent camEvent)
     {
         FullPath = Path.GetFullPath(path);
         Name = name;
@@ -49,9 +49,9 @@ public partial record class CamClip
         ThumbnailPath = Path.Combine(FullPath, "thumb.png");
     }
 
-    public static CamClip MapClip(string directory)
+    public static CamClip Map(string directory)
     {
-        var eventData = CamEvent.ParseFromFile(Path.Combine(directory, "event.json"));
+        var eventData = CamEvent.FromFile(Path.Combine(directory, "event.json"));
         var title = Path.GetFileName(directory);
         DateTime timestamp = default;
 
@@ -71,7 +71,7 @@ public partial record class CamClip
             }
         }
 
-        var chunks = CamClipChunk.GetChunks(directory);
+        var chunks = CamChunk.Map(directory);
 
         if (chunks.Count == 0)
         {
@@ -91,7 +91,7 @@ public partial record class CamClip
 
         foreach (var directory in directories)
         {
-            var clip = MapClip(directory);
+            var clip = Map(directory);
 
             if (clip is not null)
             {
@@ -99,9 +99,6 @@ public partial record class CamClip
             }
         }
     }
-
-    [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]
-    private static partial Regex FolderNameRegex();
 
     public string Summary
     {
@@ -122,4 +119,7 @@ public partial record class CamClip
     }
 
     public override string ToString() => $"{Name}";
+
+    [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]
+    private static partial Regex FolderNameRegex();
 }

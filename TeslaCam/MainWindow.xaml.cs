@@ -40,7 +40,7 @@ public partial class MainWindow : Window
             foreach (var root in roots)
             {
                 Log.Information($"Found root folder: {root}");
-                var storage = CamStorage.Traverse(root);
+                var storage = CamStorage.Map(root);
                 _clips.AddRange(storage.Clips);
             }
         }
@@ -93,7 +93,7 @@ public partial class MainWindow : Window
         CamStorage storage;
         try
         {
-            storage = CamStorage.Traverse(dialog.FolderName);
+            storage = CamStorage.Map(dialog.FolderName);
         }
         catch (UnauthorizedAccessException ex)
         {

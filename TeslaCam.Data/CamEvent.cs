@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace TeslaCam.Data;
 
 /// <summary>
-/// The event.json metadata for a <see cref="CamClip"/>.
+/// The <c>event.json</c> metadata for a <see cref="CamClip"/>.
 /// </summary>
 public record class CamEvent
 {
@@ -61,12 +61,12 @@ public record class CamEvent
         }
     }
 
-    public static CamEvent ParseFromFile(string filePath)
+    public static CamEvent FromFile(string path)
     {
-        if (!File.Exists(filePath))
+        if (!File.Exists(path))
             return null;
 
-        var json = File.ReadAllText(filePath);
+        var json = File.ReadAllText(path);
         return Deserialize(json);
     }
 }

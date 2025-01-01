@@ -31,9 +31,9 @@ public partial record class CamFile
     }
 
     /// <summary>
-    /// Find all the media files in the directory that match the typical format.
+    /// Finds all the media files in the directory that match the typical format.
     /// </summary>
-    public static IEnumerable<CamFile> FindCamFiles(string rootDirectory)
+    public static IEnumerable<CamFile> FindFiles(string rootDirectory)
     {
         var files = Directory.EnumerateFiles(rootDirectory, "*", SearchOption.TopDirectoryOnly);
 
@@ -49,8 +49,8 @@ public partial record class CamFile
         }
     }
 
+    public override string ToString() => $"{Camera}";
+
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})-(?<camera>.+)\.mp4")]
     private static partial Regex FileNameRegex();
-
-    public override string ToString() => $"{Camera}";
 }

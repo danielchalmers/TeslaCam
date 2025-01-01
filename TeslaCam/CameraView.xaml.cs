@@ -7,7 +7,7 @@ namespace TeslaCam;
 
 public partial class CameraView : UserControl
 {
-    private LinkedListNode<CamClipChunk> _currentChunk;
+    private LinkedListNode<CamChunk> _currentChunk;
     private MediaElement _currentElement;
     private MediaElement _nextElement;
 
@@ -91,11 +91,11 @@ public partial class CameraView : UserControl
             return;
         }
 
-        var camFile = _currentChunk.Value.Files.GetValueOrDefault(CameraPath);
-        if (camFile is null)
+        var file = _currentChunk.Value.Files.GetValueOrDefault(CameraPath);
+        if (file is null)
             return;
 
-        _currentElement.Source = new Uri(camFile.FullPath);
+        _currentElement.Source = new Uri(file.FullPath);
         _currentElement.Play();
     }
 

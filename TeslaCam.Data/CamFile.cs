@@ -3,10 +3,24 @@ using System.Text.RegularExpressions;
 
 namespace TeslaCam.Data;
 
+/// <summary>
+/// An actual playable dashcam media file from a specified camera angle.
+/// </summary>
 public partial record class CamFile
 {
+    /// <summary>
+    /// The path to the media file.
+    /// </summary>
     public string FilePath { get; private init; }
+
+    /// <summary>
+    /// The timestamp of the media file.
+    /// </summary>
     public DateTime Timestamp { get; private init; }
+
+    /// <summary>
+    /// The name of the camera that recorded the media file.
+    /// </summary>
     public string CameraName { get; private init; }
 
     public CamFile(string filePath)
@@ -26,6 +40,9 @@ public partial record class CamFile
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})-(?<camera>.+)\.mp4")]
     private static partial Regex FileNameRegex();
 
+    /// <summary>
+    /// Find all the media files in the directory that match the typical format.
+    /// </summary>
     public static IEnumerable<CamFile> GetCamFiles(string rootDirectory)
     {
         var files = Directory.EnumerateFiles(rootDirectory, "*", SearchOption.TopDirectoryOnly);

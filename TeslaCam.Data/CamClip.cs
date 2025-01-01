@@ -4,12 +4,34 @@ using System.Text.RegularExpressions;
 
 namespace TeslaCam.Data;
 
+/// <summary>
+/// A folder containing a collection of <see cref="CamClipChunk"/>s that make up a single continuous dashcam clip.
+/// </summary>
 public partial record class CamClip
 {
+    /// <summary>
+    /// The path to the directory containing all the media files and metadata for this clip.
+    /// </summary>
     public string DirectoryPath { get; private init; }
+
+    /// <summary>
+    /// The timestamp parsed from the folder name.
+    /// </summary>
     public DateTime Timestamp { get; private init; }
+
+    /// <summary>
+    /// The ordered list of chunks that make up the clip as a whole.
+    /// </summary>
     public LinkedList<CamClipChunk> Chunks { get; private init; }
+
+    /// <summary>
+    /// The event data associated with this clip.
+    /// </summary>
     public CamEvent Event { get; private init; }
+
+    /// <summary>
+    /// The path to the thumbnail image for this clip.
+    /// </summary>
     public string ThumbnailPath { get; private init; }
 
     public CamClip(string path)
@@ -31,6 +53,9 @@ public partial record class CamClip
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]
     private static partial Regex FolderNameRegex();
 
+    /// <summary>
+    /// Finds all the clip folders inside the specified root directory.
+    /// </summary>
     public static IEnumerable<CamClip> GetClipFolders(string rootDirectory)
     {
         var directories = Directory.GetDirectories(rootDirectory, "*", SearchOption.AllDirectories);

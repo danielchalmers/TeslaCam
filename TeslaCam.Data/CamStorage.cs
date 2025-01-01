@@ -1,8 +1,19 @@
 ﻿namespace TeslaCam.Data;
 
+/// <summary>
+/// The root folder.
+/// Typically contains <c>SavedClips</c>, <c>SentryClips</c>, and <c>RecentClips</c> but that's not a requirement.
+/// </summary>
 public partial record class CamStorage
 {
+    /// <summary>
+    /// The full path to the root folder.
+    /// </summary>
     public string DirectoryPath { get; private init; }
+
+    /// <summary>
+    /// Every clip found recursively in the storage, ordered by timestamp.
+    /// </summary>
     public IReadOnlySet<CamClip> Clips { get; private init; }
 
     public CamStorage(string path)
@@ -12,7 +23,7 @@ public partial record class CamStorage
     }
 
     /// <summary>
-    /// Name of the folder that contains the dashcam clips.
+    /// Typical name of the folder that ultimately contains the dashcam clips.
     /// </summary>
     public static string ExpectedName { get; } = "TeslaCam";
 

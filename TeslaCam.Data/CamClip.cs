@@ -74,17 +74,22 @@ public partial record class CamClip
     [GeneratedRegex(@"(?<date>\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})")]
     private static partial Regex FolderNameRegex();
 
-    public override string ToString()
+    public string Summary
     {
-        var builder = new StringBuilder();
-        builder.Append(Timestamp);
-
-        if (Event?.City is not null)
+        get
         {
-            builder.AppendLine();
-            builder.Append(Event.City);
-        }
+            var builder = new StringBuilder();
+            builder.Append(Timestamp);
 
-        return builder.ToString();
+            if (Event?.City is not null)
+            {
+                builder.AppendLine();
+                builder.Append(Event.City);
+            }
+
+            return builder.ToString();
+        }
     }
+
+    public override string ToString() => $"{Timestamp}";
 }

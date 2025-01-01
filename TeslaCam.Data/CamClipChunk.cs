@@ -36,5 +36,5 @@ public record class CamClipChunk
         return linkedList;
     }
 
-    public override string ToString() => $"{Files.Count} files";
+    public override string ToString() => $"{Timestamp}";
 }

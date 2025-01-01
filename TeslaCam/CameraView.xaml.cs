@@ -82,7 +82,7 @@ public partial class CameraView : UserControl
 
     private void PlayCurrentChunk()
     {
-        if (_currentChunk?.Value == null)
+        if (_currentChunk?.Value is null)
         {
             _currentElement.Stop();
             _currentElement.Visibility = Visibility.Collapsed;
@@ -92,7 +92,7 @@ public partial class CameraView : UserControl
         }
 
         var camFile = _currentChunk.Value.Files.GetValueOrDefault(CameraPath);
-        if (camFile == null)
+        if (camFile is null)
             return;
 
         _currentElement.Source = new Uri(camFile.FullPath);
@@ -106,22 +106,28 @@ public partial class CameraView : UserControl
 
     private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
     {
+        if (_currentChunk?.Next is null)
+        {
+            Log.Debug($"{CameraPath}: tried to open a null chunk");
+            return;
+        }
+
         _currentElement.Visibility = Visibility.Visible;
         _nextElement.Visibility = Visibility.Collapsed;
 
-        Log.Debug($"{CameraPath}: {_currentChunk?.Value?.Timestamp}");
+        Log.Debug($"{CameraPath}: opened chunk in {(Mini ? "mini" : "regular")} view");
         FileStarted?.Invoke(this, EventArgs.Empty);
     }
 
     private void MediaElement1_MediaEnded(object sender, RoutedEventArgs e)
     {
-        if (_currentChunk?.Next == null)
+        if (_currentChunk?.Next is null)
         {
             Log.Debug($"{CameraPath}: view 1 ended with no chunks left");
             return;
         }
 
-        Log.Debug($"{CameraPath}: view 1 ended; playing next chunk");
+        Log.Verbose($"{CameraPath}: view 1 ended; playing next chunk");
 
         NextChunk();
         _currentElement = MediaElement2;
@@ -136,13 +142,13 @@ public partial class CameraView : UserControl
 
     private void MediaElement2_MediaEnded(object sender, RoutedEventArgs e)
     {
-        if (_currentChunk?.Next == null)
+        if (_currentChunk?.Next is null)
         {
             Log.Debug($"{CameraPath}: view 2 ended with no chunks left");
             return;
         }
 
-        Log.Debug($"{CameraPath}: view 2 ended; playing next chunk");
+        Log.Verbose($"{CameraPath}: view 2 ended; playing next chunk");
 
         NextChunk();
         _currentElement = MediaElement1;

@@ -30,14 +30,14 @@ public partial class MainWindow : Window
 
         if (roots.Count == 0)
         {
-            Log.Debug("No common roots found");
+            Log.Information("No common root folders found");
             ErrorMessage = "No TeslaCam folders found";
         }
         else
         {
             foreach (var root in roots)
             {
-                Log.Debug($"Found root: {root}");
+                Log.Information($"Found root folder: {root}");
                 var storage = CamStorage.Traverse(root);
                 foreach (var clips in storage.Clips)
                 {
@@ -49,9 +49,14 @@ public partial class MainWindow : Window
         CurrentClip = Clips.FirstOrDefault();
     }
 
+    partial void OnCurrentClipChanging(CamClip oldValue, CamClip newValue)
+    {
+        Log.Information($"Clip changed from {oldValue?.ToString() ?? "none"} to {newValue?.ToString() ?? "none"}");
+    }
+
     private void OpenFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        Log.Debug($"User is selecting a folder");
+        Log.Debug("User is selecting a folder");
 
         var dialog = new OpenFolderDialog();
         dialog.Title = "Select a folder containing dashcam footage";
@@ -60,11 +65,11 @@ public partial class MainWindow : Window
 
         if (result != true)
         {
-            Log.Debug($"No folder was selected");
+            Log.Debug("No folder was selected");
             return;
         }
 
-        Log.Debug($"Using new root: {dialog.FolderName}");
+        Log.Information($"Using new root folder: {dialog.FolderName}");
 
         // The user has committed at this point, even if it doesn't end up loading. Lets clear the current state.
         ErrorMessage = null;
@@ -78,7 +83,7 @@ public partial class MainWindow : Window
         }
         catch (UnauthorizedAccessException ex)
         {
-            Log.Debug(ex, "Access denied");
+            Log.Error(ex, "Access to selected folder was denied");
             ErrorMessage = "Access to folder denied";
             return;
         }

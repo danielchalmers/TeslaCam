@@ -13,7 +13,7 @@ public partial class App : Application
 
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Verbose()
             .WriteTo.Debug()
             .CreateLogger();
 

@@ -52,7 +52,7 @@ public partial class MainWindow : Window
     /// A proxy for the clips list that handles ordering and filtering.
     /// </summary>
     public IReadOnlyList<CamClip> Clips => _clips
-        .Where(x => x.Summary.Contains(FilterText))
+        .Where(x => x.Summary.Contains(FilterText, StringComparison.CurrentCultureIgnoreCase))
         .OrderByDescending(x => x.Timestamp) // Order newest by timestamp, either from folder name or event data.
         .ThenBy(x => x.Name) // If the timestamp couldn't be found the clip will go to the bottom where we then order by the folder name.
         .ToList();

@@ -19,13 +19,17 @@
         <!--  Sidebar  -->
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
+            <!--  Search box  -->
+            <TextBox Grid.Row="0" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" />
+
             <!--  Display all clips with thumbnails  -->
-            <ListView Grid.Row="0"
+            <ListView Grid.Row="1"
                       ItemsSource="{Binding Clips}"
                       SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
                 <ListView.ItemTemplate>
@@ -47,7 +51,7 @@
             </ListView>
 
             <!--  Error message  -->
-            <TextBlock Grid.Row="1"
+            <TextBlock Grid.Row="2"
                        Text="{Binding ErrorMessage}"
                        Foreground="Red"
                        FontSize="16"
@@ -69,7 +73,7 @@
             </TextBlock>
 
             <!--  Folder picker  -->
-            <Button Grid.Row="2"
+            <Button Grid.Row="3"
                     Content="Select Folder"
                     HorizontalAlignment="Stretch"
                     Click="OpenFolderButton_Click"

@@ -20,6 +20,9 @@ public partial class MainWindow : Window
     [ObservableProperty]
     private string _errorMessage;
 
+    [ObservableProperty]
+    private string _filterText = string.Empty;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -49,6 +52,7 @@ public partial class MainWindow : Window
     /// A proxy for the clips list that handles ordering and filtering.
     /// </summary>
     public IReadOnlyList<CamClip> Clips => _clips
+        .Where(x => x.Summary.Contains(FilterText))
         .OrderByDescending(x => x.Timestamp) // Order newest by timestamp, either from folder name or event data.
         .ThenBy(x => x.Name) // If the timestamp couldn't be found the clip will go to the bottom where we then order by the folder name.
         .ToList();
@@ -56,6 +60,11 @@ public partial class MainWindow : Window
     partial void OnCurrentClipChanging(CamClip oldValue, CamClip newValue)
     {
         Log.Information($"Clip changed from {oldValue?.ToString() ?? "none"} to {newValue?.ToString() ?? "none"}");
+    }
+
+    partial void OnFilterTextChanged(string oldValue, string newValue)
+    {
+        OnPropertyChanged(nameof(Clips));
     }
 
     private void OpenFolderButton_Click(object sender, RoutedEventArgs e)

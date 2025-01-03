@@ -1,14 +1,14 @@
-name: Prepare for release
+name: Full Build
 
-description: Builds, tests, and creates an installer that's ready for release.
+description: Builds, tests, and creates binaries that are ready for release.
 
 inputs:
   version:
     description: 'Version number for the app'
     default: '0.0.0'
-  rids:
-    description: 'Runtime identifiers for the build'
-    default: 'win-x64 win-arm64'
+  archs:
+    description: 'Architectures for the build'
+    default: 'x64 arm64'
 
 runs:
   using: "composite"
@@ -23,23 +23,22 @@ runs:
       shell: bash
       run: dotnet test
 
-    - name: Publish
+    - name: Create Binaries
       shell: bash
       run: |
-        for rid in ${{ inputs.rids }}; do
-          dotnet publish ./TeslaCam/TeslaCam.csproj -o "publish/$rid" -c Release -f net9.0-windows -r $rid --self-contained -p:PublishSingleFile=true -p:Version=${{ inputs.version }}
+        for arch in ${{ inputs.archs }}; do
+          dotnet publish ./TeslaCam/TeslaCam.csproj -o "publish/$arch" -c Release -f net9.0-windows --os win --arch $arch --self-contained -p:PublishSingleFile=true -p:Version=${{ inputs.version }}
         done
 
-    - name: Compress
+    - name: Create Portable ZIPs
       shell: pwsh
       run: |
-        $rids = "${{ inputs.rids }}".Split(" ")
-        foreach ($rid in $rids) {
-          Compress-Archive -Path "publish/$rid/*" -DestinationPath "TeslaCamPlayer-${{ inputs.version }}-$rid.zip"
+        $archs = "${{ inputs.archs }}".Split(" ")
+        foreach ($arch in $archs) {
+          Compress-Archive -Path "publish/$arch/*" -DestinationPath "TeslaCamPlayer-${{ inputs.version }}-$arch.zip"
         }
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4
       with:
-        name: portable-artifacts
-        path: "*.zip"
+        path: |
+          publish

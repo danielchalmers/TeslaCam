@@ -29,6 +29,8 @@ jobs:
 
     - name: Create GitHub release
       uses: ncipollo/release-action@v1
+      env:
+        GH_TOKEN: ${{ github.token }}
       with:
         tag: "v${{ github.event.inputs.version }}"
         artifacts: "publish/*.zip"

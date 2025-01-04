@@ -35,7 +35,7 @@ runs:
       run: |
         $archs = "${{ inputs.archs }}".Split(" ")
         foreach ($arch in $archs) {
-          Compress-Archive -Path "publish/$arch" -DestinationPath "TeslaCamPlayer-${{ inputs.version }}-$arch.zip"
+          Compress-Archive -Path "publish/$arch" -DestinationPath "publish/TeslaCamPlayer-${{ inputs.version }}-$arch.zip"
         }
 
     - uses: actions/upload-artifact@v4

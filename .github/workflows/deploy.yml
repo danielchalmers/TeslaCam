@@ -8,7 +8,7 @@ on:
         required: true
         default: ''
       updateRelease:
-        description: 'Update existing release'
+        description: 'Replace existing release if there is one'
         required: true
         default: 'false'
 
@@ -21,6 +21,11 @@ jobs:
     - uses: ./.github/actions/full-build
       with:
          version: ${{ github.event.inputs.version }}
+
+    - name: Remove existing release with the same tag
+      if: ${{ inputs.updateRelease == 'true' }}
+      run: |
+        gh release delete "v${{ github.event.inputs.version }}" --yes || echo "Release not found for this tag"
 
     - name: Create GitHub release
       uses: ncipollo/release-action@v1

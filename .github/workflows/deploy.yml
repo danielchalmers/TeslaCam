@@ -8,24 +8,24 @@ on:
         required: true
         default: ''
       updateRelease:
-        description: 'Replace existing release if there is one'
+        description: 'Update existing release'
         required: true
         default: 'false'
 
 jobs:
-  build-and-publish:
+  deploy:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
     
     - uses: ./.github/actions/full-build
       with:
-         version: ${{ github.event.inputs.version }}
+        version: ${{ github.event.inputs.version }}
 
-    - name: Remove existing release with the same tag
-      if: ${{ inputs.updateRelease == 'true' }}
-      run: |
-        gh release delete "v${{ github.event.inputs.version }}" --yes || echo "Release not found for this tag"
+    # - name: Remove existing release with the same tag
+    #   if: ${{ inputs.updateRelease == 'true' }}
+    #   run: |
+    #     gh release delete "v${{ github.event.inputs.version }}" --yes || echo "Release not found for this tag"
 
     - name: Create GitHub release
       uses: ncipollo/release-action@v1

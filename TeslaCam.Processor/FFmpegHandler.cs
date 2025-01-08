@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using TeslaCam.Data;
 
 namespace TeslaCam.Processor;
 
@@ -88,6 +89,63 @@ public class FFmpegHandler
             "-c:a", "aac",
             outputFile
         );
+    }
+
+    /// <summary>
+    /// Overlays four camera videos on top of a main video, each labeled with its respective camera name.
+    /// If a camera is missing, a half-transparent black square is displayed in its place.
+    /// </summary>
+    /// <param name="chunk">The CamChunk containing the files of camera videos.</param>
+    /// <param name="outputFile">The output video file path.</param>
+    /// <returns>Task representing the overlay process.</returns>
+    public async Task OverlayCamerasAsync(CamChunk chunk, string outputFile)
+    {
+        if (chunk == null || !chunk.Files.Any())
+            throw new ArgumentException("Chunk cannot be null or empty.", nameof(chunk));
+
+        if (string.IsNullOrWhiteSpace(outputFile))
+            throw new ArgumentException("Output file path cannot be null or empty.", nameof(outputFile));
+
+        // Default placeholders for missing cameras
+        var mainVideo = chunk.Files["front"].FullPath;
+        var placeholderVideo = "lavfi:color=black:size=320x240:rate=30:duration=5";
+        var frontCam = chunk.Files.ContainsKey("front") ? chunk.Files["front"].FullPath : placeholderVideo;
+        var backCam = chunk.Files.ContainsKey("back") ? chunk.Files["back"].FullPath : placeholderVideo;
+        var leftCam = chunk.Files.ContainsKey("left_repeater") ? chunk.Files["left_repeater"].FullPath : placeholderVideo;
+        var rightCam = chunk.Files.ContainsKey("right_repeater") ? chunk.Files["right_repeater"].FullPath : placeholderVideo;
+
+        // FFmpeg filter complex for overlaying cameras
+        var filterComplex = $@"
+            [1:v]scale=320:240[front_scaled];
+            [2:v]scale=320:240[back_scaled];
+            [3:v]scale=320:240[left_scaled];
+            [4:v]scale=320:240[right_scaled];
+            [0:v][front_scaled]overlay=10:10:shortest=1[front];
+            [front][back_scaled]overlay=W-w-10:10:shortest=1[back];
+            [back][left_scaled]overlay=10:H-h-10:shortest=1[left];
+            [left][right_scaled]overlay=W-w-10:H-h-10:shortest=1[final];
+            [final]drawtext=fontfile=C:/WINDOWS/fonts/arial.ttf:text='Front':x=15:y=15:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[final_with_front];
+            [final_with_front]drawtext=fontfile=C:/WINDOWS/fonts/arial.ttf:text='Back':x=w-100:y=15:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[final_with_back];
+            [final_with_back]drawtext=fontfile=C:/WINDOWS/fonts/arial.ttf:text='Left':x=15:y=h-50:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[final_with_left];
+            [final_with_left]drawtext=fontfile=C:/WINDOWS/fonts/arial.ttf:text='Right':x=w-100:y=h-50:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[output]";
+
+        var arguments = new List<string>
+        {
+            "-i", mainVideo,
+            "-i", frontCam,
+            "-i", backCam,
+            "-i", leftCam,
+            "-i", rightCam,
+            "-filter_complex", filterComplex,
+            "-map", "[output]",
+            "-c:v", "libx264",
+            "-c:a", "aac",
+            "-movflags", "+faststart",
+            "-report",
+            outputFile
+        };
+
+        await RunFFmpegProcessAsync(arguments.ToArray());
     }
 
     /// <summary>

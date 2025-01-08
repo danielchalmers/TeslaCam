@@ -83,57 +83,9 @@
         <Viewbox Grid.Column="2" Stretch="Uniform">
             <!--  Camera: HW3 = 1280x960, HW4 = 2896x1876.  -->
             <!--  Use HW3 as the base resolution and scale it for other aspect ratios.  -->
-            <Grid Height="960">
-                <!--  Main feed covering the whole view  -->
-                <local:CameraView CamClip="{Binding CurrentClip}" CameraPath="front" />
-
-                <!--  Overlay for mini camera views  -->
-                <Grid Background="Transparent" Margin="24">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <!--  Top Left feed  -->
-                    <local:CameraView Grid.Column="0"
-                                      Grid.Row="0"
-                                      Mini="True"
-                                      CamClip="{Binding CurrentClip}"
-                                      CameraPath="front"
-                                      CameraName="Front" />
-
-                    <!--  Top Right feed  -->
-                    <local:CameraView Grid.Column="2"
-                                      Grid.Row="0"
-                                      Mini="True"
-                                      CamClip="{Binding CurrentClip}"
-                                      CameraPath="back"
-                                      CameraName="Back" />
-
-                    <!--  Bottom Left feed  -->
-                    <local:CameraView Grid.Column="0"
-                                      Grid.Row="2"
-                                      Mini="True"
-                                      CamClip="{Binding CurrentClip}"
-                                      CameraPath="left_repeater"
-                                      CameraName="Left" />
-
-                    <!--  Bottom Right feed  -->
-                    <local:CameraView Grid.Column="2"
-                                      Grid.Row="2"
-                                      Mini="True"
-                                      CamClip="{Binding CurrentClip}"
-                                      CameraPath="right_repeater"
-                                      CameraName="Right" />
-                </Grid>
-            </Grid>
+            <local:CameraView Height="960"
+                              Source="{Binding CurrentVideoFile}"
+                              SpeedRatio="6" />
         </Viewbox>
     </Grid>
 </Window>

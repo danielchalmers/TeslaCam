@@ -6,60 +6,29 @@ namespace TeslaCam.Processor;
 public class FFmpegHandler
 {
     private readonly string _ffmpegPath;
+    private string _workingFile;
     private Process _ffmpegProcess;
+    private CamClip _currentClip;
+    private LinkedListNode<CamChunk> _currentChunk;
 
-    public FFmpegHandler(string ffmpegExecutablePath)
+    public FFmpegHandler(string ffmpegPath)
     {
-        if (string.IsNullOrWhiteSpace(ffmpegExecutablePath) || !File.Exists(ffmpegExecutablePath))
-        {
-            throw new FileNotFoundException("FFmpeg executable not found at the specified path.", ffmpegExecutablePath);
-        }
-
-        _ffmpegPath = ffmpegExecutablePath;
+        ArgumentException.ThrowIfNullOrWhiteSpace(ffmpegPath, nameof(ffmpegPath));
+        _ffmpegPath = ffmpegPath;
+        _workingFile = Path.Combine(Path.GetTempPath(), "TeslaCam-working-file.mp4");
     }
 
-    /// <summary>
-    /// Concatenates multiple video files into a single output file.
-    /// </summary>
-    /// <param name="inputFiles">List of input video file paths.</param>
-    /// <param name="outputFile">Path to the output video file.</param>
-    public async Task ConcatenateVideosAsync(IEnumerable<string> inputFiles, string outputFile)
+    public Task<string> StartNewClip(CamClip clip)
     {
-        if (inputFiles == null || !inputFiles.Any())
-            throw new ArgumentException("Input file list cannot be null or empty.", nameof(inputFiles));
+        _currentClip = clip;
+        return CreateVideoForNextChunk();
+    }
 
-        if (string.IsNullOrWhiteSpace(outputFile))
-            throw new ArgumentException("Output file path cannot be null or empty.", nameof(outputFile));
-
-        // Create temporary file list for FFmpeg
-        var tempFileList = Path.GetTempFileName();
-        try
-        {
-            using (var writer = new StreamWriter(tempFileList))
-            {
-                foreach (var file in inputFiles)
-                {
-                    if (!File.Exists(file))
-                        throw new FileNotFoundException("Input file not found.", file);
-
-                    writer.WriteLine($"file '{file.Replace("\\", "/")}'");
-                }
-            }
-
-            await RunFFmpegProcessAsync(
-                "-f", "concat",
-                "-safe", "0",
-                "-i", tempFileList.Replace("\\", "/"),
-                "-c:v", "libx264",
-                "-c:a", "aac",
-                "-movflags", "+faststart",
-                outputFile
-            );
-        }
-        finally
-        {
-            File.Delete(tempFileList); // Clean up temporary file
-        }
+    public async Task<string> CreateVideoForNextChunk()
+    {
+        _currentChunk = _currentChunk?.Next ?? _currentClip.Chunks.First;
+        await OverlayCamerasAsync(_currentChunk.Value, _workingFile);
+        return _workingFile;
     }
 
     /// <summary>
@@ -69,7 +38,7 @@ public class FFmpegHandler
     /// <param name="chunk">The CamChunk containing the files of camera videos.</param>
     /// <param name="outputFile">The output video file path.</param>
     /// <returns>Task representing the overlay process.</returns>
-    public async Task OverlayCamerasAsync(CamChunk chunk, string outputFile)
+    private async Task OverlayCamerasAsync(CamChunk chunk, string outputFile)
     {
         if (chunk == null || !chunk.Files.Any())
             throw new ArgumentException("Chunk cannot be null or empty.", nameof(chunk));

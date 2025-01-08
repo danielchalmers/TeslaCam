@@ -4,33 +4,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:TeslaCam"
-             mc:Ignorable="d">
-    <Grid>
-        <MediaElement x:Name="MediaElement1"
-                      MediaOpened="MediaElement_MediaOpened"
-                      MediaEnded="MediaElement1_MediaEnded"
-                      MediaFailed="MediaElement1_MediaFailed"
-                      Stretch="Uniform"
-                      LoadedBehavior="Manual"
-                      UnloadedBehavior="Manual"
-                      SpeedRatio="12" />
-
-        <MediaElement x:Name="MediaElement2"
-                      MediaOpened="MediaElement_MediaOpened"
-                      MediaEnded="MediaElement2_MediaEnded"
-                      MediaFailed="MediaElement2_MediaFailed"
-                      Stretch="Uniform"
-                      LoadedBehavior="Manual"
-                      UnloadedBehavior="Manual"
-                      SpeedRatio="12" />
-
-        <TextBlock x:Name="NameTextBlock"
-                   Text="{Binding CameraName, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                   Foreground="White"
-                   FontSize="20"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Bottom"
-                   Margin="8"
-                   Visibility="Collapsed" />
-    </Grid>
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=local:CameraView}">
+    <MediaElement x:Name="MediaElement"
+                  MediaOpened="MediaElement_MediaOpened"
+                  MediaEnded="MediaElement_MediaEnded"
+                  MediaFailed="MediaElement_MediaFailed"
+                  Stretch="Uniform" />
 </UserControl>

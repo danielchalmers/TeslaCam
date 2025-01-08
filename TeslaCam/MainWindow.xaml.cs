@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 using Serilog;
 using TeslaCam.Data;
+using TeslaCam.Processor;
 
 namespace TeslaCam;
 
@@ -12,10 +13,14 @@ namespace TeslaCam;
 [ObservableObject]
 public partial class MainWindow : Window
 {
+    private readonly FFmpegHandler _ffmpeg;
     private readonly List<CamClip> _clips = [];
 
     [ObservableProperty]
     private CamClip _currentClip;
+
+    [ObservableProperty]
+    private string _currentVideoFile;
 
     [ObservableProperty]
     private string _errorMessage;
@@ -45,7 +50,16 @@ public partial class MainWindow : Window
             }
         }
 
-        CurrentClip = Clips.FirstOrDefault();
+        _ffmpeg = new("ffmpeg");
+
+        PropertyChanged += async (_, e) =>
+        {
+            if (e.PropertyName == nameof(CurrentClip))
+            {
+                await _ffmpeg.StartNewClip(CurrentClip);
+                CurrentVideoFile = await _ffmpeg.CreateVideoForNextChunk();
+            }
+        };
     }
 
     /// <summary>

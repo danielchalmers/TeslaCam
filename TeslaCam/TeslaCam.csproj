@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TeslaCam.Data\TeslaCam.Data.csproj" />
+    <ProjectReference Include="..\TeslaCam.Processor\TeslaCam.Processor.csproj" />
   </ItemGroup>
 
 </Project>

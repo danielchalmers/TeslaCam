@@ -78,7 +78,7 @@ public class FFmpegHandler
             throw new ArgumentException("Output file path cannot be null or empty.", nameof(outputFile));
 
         // Common settings
-        var fontPath = "C:/WINDOWS/fonts/Consolas.ttf";
+        var fontPath = "C:/Windows/Fonts/SegoeUI.ttf";
         var resolution = "256x192";
         var placeholderVideo = $"lavfi:color=black:size={resolution}:rate=30:duration=5";
         var cameraPadding = 30;
@@ -92,13 +92,13 @@ public class FFmpegHandler
 
         var filterComplex = $@"
             [1:v]scale={resolution}[front_scaled];
-            [front_scaled]drawtext=fontfile={fontPath}:text='Front':x=5:y=h-30:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[front_labeled];
+            [front_scaled]drawtext=fontfile={fontPath}:text='Front':x=5:y=h-30:fontsize=20:fontcolor=white[front_labeled];
             [2:v]scale={resolution}[back_scaled];
-            [back_scaled]drawtext=fontfile={fontPath}:text='Back':x=5:y=h-30:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[back_labeled];
+            [back_scaled]drawtext=fontfile={fontPath}:text='Back':x=5:y=h-30:fontsize=20:fontcolor=white[back_labeled];
             [3:v]scale={resolution}[left_scaled];
-            [left_scaled]drawtext=fontfile={fontPath}:text='Left':x=5:y=h-30:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[left_labeled];
+            [left_scaled]drawtext=fontfile={fontPath}:text='Left':x=5:y=h-30:fontsize=20:fontcolor=white[left_labeled];
             [4:v]scale={resolution}[right_scaled];
-            [right_scaled]drawtext=fontfile={fontPath}:text='Right':x=5:y=h-30:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[right_labeled];
+            [right_scaled]drawtext=fontfile={fontPath}:text='Right':x=5:y=h-30:fontsize=20:fontcolor=white[right_labeled];
 
             [0:v][front_labeled]overlay={cameraPadding}:{cameraPadding}:shortest=1[front_overlay];
             [front_overlay][back_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:{cameraPadding}:shortest=1[back_overlay];

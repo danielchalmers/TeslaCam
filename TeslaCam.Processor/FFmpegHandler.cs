@@ -63,35 +63,6 @@ public class FFmpegHandler
     }
 
     /// <summary>
-    /// Applies an overlay video on top of a background video.
-    /// </summary>
-    /// <param name="backgroundFile">Path to the background video file.</param>
-    /// <param name="overlayFile">Path to the overlay video file.</param>
-    /// <param name="outputFile">Path to the output video file.</param>
-    /// <param name="xOffset">X offset of the overlay video.</param>
-    /// <param name="yOffset">Y offset of the overlay video.</param>
-    public async Task ApplyOverlayAsync(string backgroundFile, string overlayFile, string outputFile, int xOffset = 0, int yOffset = 0)
-    {
-        if (string.IsNullOrWhiteSpace(backgroundFile) || !File.Exists(backgroundFile))
-            throw new FileNotFoundException("Background video file not found.", backgroundFile);
-
-        if (string.IsNullOrWhiteSpace(overlayFile) || !File.Exists(overlayFile))
-            throw new FileNotFoundException("Overlay video file not found.", overlayFile);
-
-        if (string.IsNullOrWhiteSpace(outputFile))
-            throw new ArgumentException("Output file path cannot be null or empty.", nameof(outputFile));
-
-        await RunFFmpegProcessAsync(
-            "-i", backgroundFile,
-            "-i", overlayFile,
-            "-filter_complex", $"[0:v][1:v]overlay={xOffset}:{yOffset}",
-            "-c:v", "libx264",
-            "-c:a", "aac",
-            outputFile
-        );
-    }
-
-    /// <summary>
     /// Overlays four camera videos on top of a main video, each labeled with its respective camera name.
     /// If a camera is missing, a half-transparent black square is displayed in its place.
     /// </summary>
@@ -106,31 +77,38 @@ public class FFmpegHandler
         if (string.IsNullOrWhiteSpace(outputFile))
             throw new ArgumentException("Output file path cannot be null or empty.", nameof(outputFile));
 
-        // Default placeholders for missing cameras
+        // Common settings
+        var fontPath = "C:/WINDOWS/fonts/Consolas.ttf";
+        var resolution = "256x192";
+        var placeholderVideo = $"lavfi:color=black:size={resolution}:rate=30:duration=5";
+        var cameraPadding = 30;
+
+        // Video inputs
         var mainVideo = chunk.Files["front"].FullPath;
-        var placeholderVideo = "lavfi:color=black:size=320x240:rate=30:duration=5";
         var frontCam = chunk.Files.ContainsKey("front") ? chunk.Files["front"].FullPath : placeholderVideo;
         var backCam = chunk.Files.ContainsKey("back") ? chunk.Files["back"].FullPath : placeholderVideo;
         var leftCam = chunk.Files.ContainsKey("left_repeater") ? chunk.Files["left_repeater"].FullPath : placeholderVideo;
         var rightCam = chunk.Files.ContainsKey("right_repeater") ? chunk.Files["right_repeater"].FullPath : placeholderVideo;
 
-        // FFmpeg filter complex for overlaying cameras
         var filterComplex = $@"
-            [1:v]scale=320:240[front_scaled];
-            [2:v]scale=320:240[back_scaled];
-            [3:v]scale=320:240[left_scaled];
-            [4:v]scale=320:240[right_scaled];
-            [0:v][front_scaled]overlay=10:10:shortest=1[front];
-            [front][back_scaled]overlay=W-w-10:10:shortest=1[back];
-            [back][left_scaled]overlay=10:H-h-10:shortest=1[left];
-            [left][right_scaled]overlay=W-w-10:H-h-10:shortest=1[final];
-            [final]drawtext=fontfile=C:/WINDOWS/fonts/arial.ttf:text='Front':x=15:y=15:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[final_with_front];
-            [final_with_front]drawtext=fontfile=C:/WINDOWS/fonts/arial.ttf:text='Back':x=w-100:y=15:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[final_with_back];
-            [final_with_back]drawtext=fontfile=C:/WINDOWS/fonts/arial.ttf:text='Left':x=15:y=h-50:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[final_with_left];
-            [final_with_left]drawtext=fontfile=C:/WINDOWS/fonts/arial.ttf:text='Right':x=w-100:y=h-50:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[output]";
+            [1:v]scale={resolution}[front_scaled];
+            [front_scaled]drawtext=fontfile={fontPath}:text='Front':x=5:y=h-30:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[front_labeled];
+            [2:v]scale={resolution}[back_scaled];
+            [back_scaled]drawtext=fontfile={fontPath}:text='Back':x=5:y=h-30:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[back_labeled];
+            [3:v]scale={resolution}[left_scaled];
+            [left_scaled]drawtext=fontfile={fontPath}:text='Left':x=5:y=h-30:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[left_labeled];
+            [4:v]scale={resolution}[right_scaled];
+            [right_scaled]drawtext=fontfile={fontPath}:text='Right':x=5:y=h-30:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5[right_labeled];
 
+            [0:v][front_labeled]overlay={cameraPadding}:{cameraPadding}:shortest=1[front_overlay];
+            [front_overlay][back_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:{cameraPadding}:shortest=1[back_overlay];
+            [back_overlay][left_labeled]overlay={cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}:shortest=1[left_overlay];
+            [left_overlay][right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}[output]";
+
+        // FFmpeg arguments
         var arguments = new List<string>
         {
+            "-y", // Overwrite existing files
             "-i", mainVideo,
             "-i", frontCam,
             "-i", backCam,
@@ -141,56 +119,12 @@ public class FFmpegHandler
             "-c:v", "libx264",
             "-c:a", "aac",
             "-movflags", "+faststart",
-            "-report",
+            "-report", // Debugging log
             outputFile
         };
 
+
         await RunFFmpegProcessAsync(arguments.ToArray());
-    }
-
-    /// <summary>
-    /// Streams a concatenated set of video files to an HTTP endpoint.
-    /// </summary>
-    /// <param name="inputFiles">List of input video file paths.</param>
-    /// <param name="outputUri">HTTP endpoint URI for streaming.</param>
-    public async Task StreamToHttpAsync(IEnumerable<string> inputFiles, string outputUri)
-    {
-        if (inputFiles == null || !inputFiles.Any())
-            throw new ArgumentException("Input file list cannot be null or empty.", nameof(inputFiles));
-
-        if (string.IsNullOrWhiteSpace(outputUri))
-            throw new ArgumentException("Output URI cannot be null or empty.", nameof(outputUri));
-
-        // Create temporary file list for FFmpeg
-        var tempFileList = Path.GetTempFileName();
-        try
-        {
-            using (var writer = new StreamWriter(tempFileList))
-            {
-                foreach (var file in inputFiles)
-                {
-                    if (!File.Exists(file))
-                        throw new FileNotFoundException("Input file not found.", file);
-
-                    writer.WriteLine($"file '{file.Replace("\\", "/")}'");
-                }
-            }
-
-            await RunFFmpegProcessAsync(
-                "-f", "concat",
-                "-safe", "0",
-                "-i", tempFileList.Replace("\\", "/"),
-                "-c:v", "libx264",
-                "-c:a", "aac",
-                "-f", "mpegts",
-                outputUri
-            );
-        }
-        finally
-        {
-            // Clean up temporary file
-            File.Delete(tempFileList);
-        }
     }
 
     /// <summary>

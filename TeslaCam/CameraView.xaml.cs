@@ -39,13 +39,14 @@ public partial class CameraView : UserControl
     {
         var control = (CameraView)d;
 
+        var uri = new Uri((string)e.NewValue);
         try
         {
-            control.MediaElement.Source = new Uri((string)e.NewValue);
+            control.MediaElement.Open(uri);
         }
         catch (Exception ex)
         {
-            Log.Error($"Invalid Source URI: {e.NewValue}, Exception: {ex.Message}");
+            Log.Error($"Invalid Source URI: {uri}, Exception: {ex.Message}");
         }
     }
 
@@ -54,20 +55,5 @@ public partial class CameraView : UserControl
         var control = (CameraView)d;
 
         control.MediaElement.SpeedRatio = (double)e.NewValue;
-    }
-
-    private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
-    {
-        Log.Debug($"Media: Started {Source}");
-    }
-
-    private void MediaElement_MediaEnded(object sender, RoutedEventArgs e)
-    {
-        Log.Debug($"Media: Ended {Source}");
-    }
-
-    private void MediaElement_MediaFailed(object sender, ExceptionRoutedEventArgs e)
-    {
-        Log.Error($"Media: Failed {Source}, Error: {e.ErrorException?.Message}");
     }
 }

@@ -4,11 +4,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:TeslaCam"
+             xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:CameraView}">
-    <MediaElement x:Name="MediaElement"
-                  MediaOpened="MediaElement_MediaOpened"
-                  MediaEnded="MediaElement_MediaEnded"
-                  MediaFailed="MediaElement_MediaFailed"
-                  Stretch="Uniform" />
+    <ffme:MediaElement x:Name="MediaElement"
+                       Background="Gray"
+                       LoadedBehavior="Play"
+                       UnloadedBehavior="Manual" />
 </UserControl>

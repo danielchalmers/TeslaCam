@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 using Serilog;
@@ -17,49 +18,28 @@ public partial class MainWindow : Window
     private readonly List<CamClip> _clips = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Clips))]
     private CamClip _currentClip;
 
     [ObservableProperty]
-    private string _currentVideoFile;
+    private string _tempVideoPath;
 
     [ObservableProperty]
     private string _errorMessage;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Clips))]
     private string _filterText = string.Empty;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = this;
-
-        var roots = CamStorage.FindCommonRoots().ToList();
-
-        if (roots.Count == 0)
-        {
-            Log.Information("No common root folders found");
-            ErrorMessage = "No TeslaCam folders found";
-        }
-        else
-        {
-            foreach (var root in roots)
-            {
-                Log.Information($"Found root folder: {root}");
-                var storage = CamStorage.Map(root);
-                _clips.AddRange(storage.Clips);
-            }
-        }
+        PropertyChanged += OnPropertyChanged;
 
         _ffmpeg = new("ffmpeg");
 
-        PropertyChanged += async (_, e) =>
-        {
-            if (e.PropertyName == nameof(CurrentClip))
-            {
-                await _ffmpeg.StartNewClip(CurrentClip);
-                CurrentVideoFile = await _ffmpeg.CreateVideoForNextChunk();
-            }
-        };
+        LoadClips(CamStorage.FindCommonRoots());
     }
 
     /// <summary>
@@ -71,13 +51,48 @@ public partial class MainWindow : Window
         .ThenBy(x => x.Name) // If the timestamp couldn't be found the clip will go to the bottom where we then order by the folder name.
         .ToList();
 
-    partial void OnCurrentClipChanging(CamClip oldValue, CamClip newValue)
+    protected async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        Log.Information($"Clip changed from {oldValue?.ToString() ?? "none"} to {newValue?.ToString() ?? "none"}");
+        switch (e.PropertyName)
+        {
+            case nameof(CurrentClip):
+                if (CurrentClip != null)
+                {
+                    await _ffmpeg.StartNewClip(CurrentClip);
+                    TempVideoPath = await _ffmpeg.CreateVideoForNextChunk();
+                }
+                break;
+        }
     }
 
-    partial void OnFilterTextChanged(string oldValue, string newValue)
+    private void LoadClips(params IEnumerable<string> roots)
     {
+        ErrorMessage = null;
+        CurrentClip = null;
+        _clips.Clear();
+
+        if (!roots.Any())
+        {
+            Log.Information("No roots found");
+            ErrorMessage = "No TeslaCam folders found";
+        }
+
+        foreach (var root in roots)
+        {
+            Log.Information($"Found root folder: {root}");
+
+            try
+            {
+                var storage = CamStorage.Map(root);
+                _clips.AddRange(storage.Clips);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Error(ex, "Access to folder was denied");
+                ErrorMessage = "Access to folder was denied";
+            }
+        }
+
         OnPropertyChanged(nameof(Clips));
     }
 
@@ -85,8 +100,11 @@ public partial class MainWindow : Window
     {
         Log.Debug("User is selecting a folder");
 
-        var dialog = new OpenFolderDialog();
-        dialog.Title = "Select a folder containing dashcam footage";
+        var dialog = new OpenFolderDialog
+        {
+            Multiselect = true,
+            Title = "Select a folder containing dashcam footage",
+        };
 
         var result = dialog.ShowDialog();
 
@@ -96,29 +114,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        Log.Information($"Using new root folder: {dialog.FolderName}");
-
-        // The user has committed at this point, even if it doesn't end up loading. Lets clear the current state.
-        ErrorMessage = null;
-        CurrentClip = null;
-        _clips.Clear();
-        OnPropertyChanged(nameof(Clips));
-
-        CamStorage storage;
-        try
-        {
-            storage = CamStorage.Map(dialog.FolderName);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            Log.Error(ex, "Access to selected folder was denied");
-            ErrorMessage = "Access to folder denied";
-            return;
-        }
-
-        _clips.AddRange(storage.Clips);
-        OnPropertyChanged(nameof(Clips));
-
-        CurrentClip = Clips.FirstOrDefault();
+        LoadClips(dialog.FolderNames);
     }
 }

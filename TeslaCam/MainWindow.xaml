@@ -84,7 +84,7 @@
             <!--  Camera: HW3 = 1280x960, HW4 = 2896x1876.  -->
             <!--  Use HW3 as the base resolution and scale it for other aspect ratios.  -->
             <local:CameraView Height="960"
-                              Source="{Binding CurrentVideoFile}"
+                              Source="{Binding TempVideoPath}"
                               SpeedRatio="6" />
         </Viewbox>
     </Grid>

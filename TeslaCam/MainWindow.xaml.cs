@@ -22,9 +22,6 @@ public partial class MainWindow : Window
     private CamClip _currentClip;
 
     [ObservableProperty]
-    private string _tempVideoPath;
-
-    [ObservableProperty]
     private string _errorMessage;
 
     [ObservableProperty]
@@ -53,15 +50,18 @@ public partial class MainWindow : Window
 
     protected async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        switch (e.PropertyName)
+        if (e.PropertyName == nameof(CurrentClip))
         {
-            case nameof(CurrentClip):
-                if (CurrentClip != null)
-                {
-                    await _ffmpeg.StartNewClip(CurrentClip);
-                    TempVideoPath = await _ffmpeg.CreateVideoForNextChunk();
-                }
-                break;
+            await MediaElement.Close();
+
+            if (CurrentClip is not null)
+            {
+                Log.Debug($"Starting new clip: {CurrentClip.FullPath}");
+                var path = await _ffmpeg.StartNewClip(CurrentClip);
+                Log.Debug($"Opening media: {path}");
+                await MediaElement.Open(new Uri(path));
+                await MediaElement.Play();
+            }
         }
     }
 

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TeslaCam"
+        xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         Title="TeslaCam Player"
@@ -81,11 +82,13 @@
         </Grid>
 
         <Viewbox Grid.Column="2" Stretch="Uniform">
-            <!--  Camera: HW3 = 1280x960, HW4 = 2896x1876.  -->
-            <!--  Use HW3 as the base resolution and scale it for other aspect ratios.  -->
-            <local:CameraView Height="960"
-                              Source="{Binding TempVideoPath}"
-                              SpeedRatio="6" />
+            <!--  Use HW3 (HW3 = 1280x960, HW4 = 2896x1876) as the base resolution and scale it for other aspect ratios.  -->
+            <ffme:MediaElement x:Name="MediaElement"
+                               Height="960"
+                               Background="Gray"
+                               LoadedBehavior="Play"
+                               UnloadedBehavior="Manual"
+                               SpeedRatio="6" />
         </Viewbox>
     </Grid>
 </Window>

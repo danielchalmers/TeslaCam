@@ -82,14 +82,25 @@
                     Margin="0,8,0,0" />
         </Grid>
 
-        <Viewbox Grid.Column="2" Stretch="Uniform">
-            <!--  Use HW3 (HW3 = 1280x960, HW4 = 2896x1876) as the base resolution and scale it for other aspect ratios.  -->
-            <ffme:MediaElement x:Name="MediaElement"
-                               Height="960"
-                               LoadedBehavior="Play"
-                               SpeedRatio="6"
-                               MediaEnded="MediaElement_MediaEnded"
-                               MediaFailed="MediaElement_MediaFailed" />
-        </Viewbox>
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Viewbox Grid.Row="0" Stretch="Uniform">
+                <!--  Use HW3 (HW3 = 1280x960, HW4 = 2896x1876) as the base resolution and scale it for other aspect ratios.  -->
+                <ffme:MediaElement x:Name="MediaElement"
+                                   Height="960"
+                                   LoadedBehavior="Play"
+                                   SpeedRatio="6"
+                                   MediaEnded="MediaElement_MediaEnded"
+                                   MediaFailed="MediaElement_MediaFailed" />
+            </Viewbox>
+
+            <ProgressBar Grid.Row="1"
+                         IsIndeterminate="True"
+                         Visibility="{Binding IsProcessing, Converter={local:BooleanToVisibilityConverter}}" />
+        </Grid>
     </Grid>
 </Window>

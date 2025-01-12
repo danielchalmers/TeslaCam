@@ -31,6 +31,9 @@ public partial class MainWindow : Window
     [NotifyPropertyChangedFor(nameof(Clips))]
     private string _filterText = string.Empty;
 
+    [ObservableProperty]
+    private bool _isProcessing;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -51,22 +54,24 @@ public partial class MainWindow : Window
 
     protected async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(CurrentClip))
+        if (e.PropertyName == nameof(CurrentClip) && Library.IsInitialized)
         {
             await MediaElement.Close();
 
             if (CurrentClip is not null)
             {
+                IsProcessing = true;
                 Log.Debug($"Starting new clip: {CurrentClip.FullPath}");
                 var path = await _ffmpeg.StartNewClip(CurrentClip);
                 Log.Debug($"Opening media: {path}");
                 await MediaElement.Open(new Uri(path));
                 await MediaElement.Play();
+                IsProcessing = false;
             }
         }
     }
 
-    private async void Window_ContentRendered(object sender, EventArgs e)
+    private async Task<bool> TryLoadFFmpeg()
     {
         var ffmpegPaths = await PackageManager.FindFFmpegPaths();
 
@@ -80,13 +85,19 @@ public partial class MainWindow : Window
             {
                 Library.LoadFFmpeg();
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException ex)
             {
-                Log.Debug("FFmpeg not found at: {Path}", ffmpegPath);
+                Log.Debug($"FFmpeg not found at: {ex.FileName}");
             }
         }
 
-        // If none of the paths worked, we'll try to install it.
+        return loaded;
+    }
+
+    private async void Window_ContentRendered(object sender, EventArgs e)
+    {
+        var loaded = await TryLoadFFmpeg();
+
         if (!loaded)
         {
             var shouldInstall = MessageBox.Show("ffmpeg is not installed. Do you want to install it now?", "TeslaCam", MessageBoxButton.OKCancel) == MessageBoxResult.OK;
@@ -99,7 +110,9 @@ public partial class MainWindow : Window
             }
 
             Log.Information("Installing ffmpeg");
+            IsProcessing = true;
             loaded = await PackageManager.InstallWinGetPackage("Gyan.FFmpeg.Shared");
+            IsProcessing = false;
 
             if (!loaded)
             {

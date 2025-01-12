@@ -67,6 +67,30 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void Window_ContentRendered(object sender, EventArgs e)
+    {
+        var installed = await PackageInstaller.CheckIfFfmpegInstalled();
+        if (!installed)
+        {
+            var shouldInstall = MessageBox.Show("ffmpeg is not installed. Do you want to install it now?", "TeslaCam", MessageBoxButton.OKCancel) == MessageBoxResult.OK;
+
+            if (!shouldInstall)
+            {
+                Close();
+                return;
+            }
+
+            installed = await PackageInstaller.InstallWinGetPackage("ffmpeg");
+
+            if (!installed)
+            {
+                MessageBox.Show("Failed to install ffmpeg. Please install it manually.", "TeslaCam", MessageBoxButton.OK);
+                Close();
+                return;
+            }
+        }
+    }
+
     private void LoadClips(params IEnumerable<string> roots)
     {
         ErrorMessage = null;

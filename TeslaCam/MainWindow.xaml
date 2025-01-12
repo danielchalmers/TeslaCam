@@ -9,7 +9,8 @@
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         Title="TeslaCam Player"
         MinWidth="1200"
-        MinHeight="600">
+        MinHeight="600"
+        ContentRendered="Window_ContentRendered">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350" />

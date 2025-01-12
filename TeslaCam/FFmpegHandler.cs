@@ -98,6 +98,7 @@ public class FFmpegHandler
     {
         var result = await Cli.Wrap("ffmpeg")
             .WithArguments(arguments)
+            .WithWorkingDirectory(Library.FFmpegDirectory)
             .ExecuteAsync();
 
         if (!result.IsSuccess)

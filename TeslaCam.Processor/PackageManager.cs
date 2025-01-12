@@ -32,14 +32,12 @@ public static class PackageManager
             .IsSuccess;
     }
 
-    public static async Task<string> FindFFmpegPath()
+    public static async Task<string[]> FindFFmpegPaths()
     {
         var result = await Cli.Wrap("where")
             .WithArguments("ffmpeg")
             .ExecuteBufferedAsync();
 
-        var path = result.StandardOutput.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-
-        return path;
+        return result.StandardOutput.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
     }
 }

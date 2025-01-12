@@ -68,47 +68,6 @@ public partial class MainWindow : Window
 
     private async void Window_ContentRendered(object sender, EventArgs e)
     {
-        var ffmpegPaths = await PackageManager.FindFFmpegPaths();
-
-        // Try loading all the found ffmpeg paths.
-        var loaded = false;
-        foreach (var ffmpegPath in ffmpegPaths)
-        {
-            Library.FFmpegDirectory = Path.GetDirectoryName(ffmpegPath);
-
-            try
-            {
-                Library.LoadFFmpeg();
-            }
-            catch (FileNotFoundException)
-            {
-                Log.Debug("FFmpeg not found at: {Path}", ffmpegPath);
-            }
-        }
-
-        // If none of the paths worked, we'll try to install it.
-        if (!loaded)
-        {
-            var shouldInstall = MessageBox.Show("ffmpeg is not installed. Do you want to install it now?", "TeslaCam", MessageBoxButton.OKCancel) == MessageBoxResult.OK;
-
-            if (!shouldInstall)
-            {
-                Log.Information("User didn't want to install ffmpeg");
-                Close();
-                return;
-            }
-
-            Log.Information("Installing ffmpeg");
-            loaded = await PackageManager.InstallWinGetPackage("Gyan.FFmpeg.Shared");
-
-            if (!loaded)
-            {
-                MessageBox.Show("Failed to install ffmpeg. Please install it manually.", "TeslaCam", MessageBoxButton.OK);
-                Log.Error("Failed to install ffmpeg");
-                Close();
-                return;
-            }
-        }
     }
 
     private void LoadClips(params IEnumerable<string> roots)

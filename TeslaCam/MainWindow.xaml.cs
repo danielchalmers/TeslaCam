@@ -5,6 +5,8 @@ using Microsoft.Win32;
 using Serilog;
 using TeslaCam.Data;
 using TeslaCam.Processor;
+using Unosquare.FFME;
+using Unosquare.FFME.Common;
 
 namespace TeslaCam;
 
@@ -115,5 +117,15 @@ public partial class MainWindow : Window
         }
 
         LoadClips(dialog.FolderNames);
+    }
+
+    private void MediaElement_MediaEnded(object sender, EventArgs e)
+    {
+        Log.Debug("Media: Ended");
+    }
+
+    private void MediaElement_MediaFailed(object sender, MediaFailedEventArgs e)
+    {
+        Log.Error(e.ErrorException, "Media: Failed");
     }
 }

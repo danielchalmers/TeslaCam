@@ -88,7 +88,9 @@
                                Background="Gray"
                                LoadedBehavior="Play"
                                UnloadedBehavior="Manual"
-                               SpeedRatio="6" />
+                               SpeedRatio="6"
+                               MediaEnded="MediaElement_MediaEnded"
+                               MediaFailed="MediaElement_MediaFailed" />
         </Viewbox>
     </Grid>
 </Window>

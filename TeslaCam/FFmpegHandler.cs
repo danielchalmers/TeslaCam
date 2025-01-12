@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using CliWrap;
+using CliWrap.Builders;
 using Serilog;
 using TeslaCam.Data;
 using Unosquare.FFME;
@@ -48,15 +49,7 @@ public class FFmpegHandler
         // Common settings
         var fontPath = "C:/Windows/Fonts/SegoeUI.ttf";
         var resolution = "256x192";
-        var placeholderVideo = $"lavfi:color=black:size={resolution}:rate=30:duration=5";
         var cameraPadding = 30;
-
-        // Video inputs
-        var mainVideo = chunk.Files["front"].FullPath;
-        var frontCam = chunk.Files.ContainsKey("front") ? chunk.Files["front"].FullPath : placeholderVideo;
-        var backCam = chunk.Files.ContainsKey("back") ? chunk.Files["back"].FullPath : placeholderVideo;
-        var leftCam = chunk.Files.ContainsKey("left_repeater") ? chunk.Files["left_repeater"].FullPath : placeholderVideo;
-        var rightCam = chunk.Files.ContainsKey("right_repeater") ? chunk.Files["right_repeater"].FullPath : placeholderVideo;
 
         var filterComplex = $@"
             [1:v]scale={resolution}[front_scaled];
@@ -73,25 +66,46 @@ public class FFmpegHandler
             [back_overlay][left_labeled]overlay={cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}:shortest=1[left_overlay];
             [left_overlay][right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}[output]";
 
-        // FFmpeg arguments
-        var arguments = new List<string>
-        {
+
+        List<string> args = [
             "-y", // Overwrite existing files
-            "-i", mainVideo,
-            "-i", frontCam,
-            "-i", backCam,
-            "-i", leftCam,
-            "-i", rightCam,
+            "-i", $@"{chunk.Files["front"].FullPath}",
+        ];
+
+        void AddCam(string name)
+        {
+            var file = chunk.Files.GetValueOrDefault(name);
+
+            if (file is null)
+            {
+                args.Add("-f");
+                args.Add("lavfi");
+                args.Add("-i");
+                args.Add($"color=black@0.5:size={resolution}:rate=30");
+            }
+            else
+            {
+                args.Add("-i");
+                args.Add($@"{file.FullPath}");
+            }
+        }
+
+        AddCam("front");
+        AddCam("back");
+        AddCam("left_repeater");
+        AddCam("right_repeater");
+
+        args.AddRange([
             "-filter_complex", filterComplex,
             "-map", "[output]",
             "-c:v", "libx264",
-            "-c:a", "aac",
+            "-preset", "ultrafast",
             "-movflags", "+faststart",
             "-report", // Debugging log
             outputFile
-        };
+        ]);
 
-        await RunFFmpegProcessAsync(arguments);
+        await RunFFmpegProcessAsync(args);
     }
 
     private static async Task RunFFmpegProcessAsync(params IEnumerable<string> arguments)

@@ -25,8 +25,8 @@ public static class PackageManager
 
     public static async Task DownloadAndExtractFFmpeg()
     {
-        var outputFolder = "ffmpeg";
-        var url = "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl-shared.zip"; // TODO: ARM64 builds?
+        var outputFolder = Path.GetFullPath("ffmpeg");
+        var url = "https://github.com/GyanD/codexffmpeg/releases/download/7.0/ffmpeg-7.0-full_build-shared.zip"; // TODO: ARM64 builds?
         var tempPath = Path.GetTempFileName();
 
         Log.Information("Getting ffmpeg");
@@ -40,9 +40,9 @@ public static class PackageManager
         File.Delete(tempPath);
     }
 
-    public static IEnumerable<string> FindFFmpegPaths()
+    public static IEnumerable<string> FindFFmpegDirectories(string searchDirectory = ".")
     {
-        foreach (var path in Directory.EnumerateFiles(".", "ffmpeg.exe", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFiles(searchDirectory, "ffmpeg.exe", SearchOption.AllDirectories))
         {
             yield return Path.GetFullPath(Path.GetDirectoryName(path));
         }

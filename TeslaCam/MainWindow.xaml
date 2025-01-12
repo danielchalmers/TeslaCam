@@ -94,6 +94,7 @@
                                    Height="960"
                                    LoadedBehavior="Play"
                                    SpeedRatio="6"
+                                   MediaOpened="MediaElement_MediaOpened"
                                    MediaEnded="MediaElement_MediaEnded"
                                    MediaFailed="MediaElement_MediaFailed" />
             </Viewbox>

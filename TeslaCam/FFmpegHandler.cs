@@ -8,7 +8,7 @@ namespace TeslaCam;
 
 public class FFmpegHandler
 {
-    private string _workingFile;
+    private readonly string _workingFile;
     private CamClip _currentClip;
     private LinkedListNode<CamChunk> _currentChunk;
 
@@ -60,13 +60,13 @@ public class FFmpegHandler
 
         var filterComplex = $@"
             [1:v]scale={resolution}[front_scaled];
-            [front_scaled]drawtext=fontfile={fontPath}:text='Front':x=5:y=h-30:fontsize=20:fontcolor=white[front_labeled];
+            [front_scaled]drawtext=fontfile={fontPath}:text='Front':x=5:y=h-25:fontsize=20:fontcolor=white[front_labeled];
             [2:v]scale={resolution}[back_scaled];
-            [back_scaled]drawtext=fontfile={fontPath}:text='Back':x=5:y=h-30:fontsize=20:fontcolor=white[back_labeled];
+            [back_scaled]drawtext=fontfile={fontPath}:text='Back':x=5:y=h-25:fontsize=20:fontcolor=white[back_labeled];
             [3:v]scale={resolution}[left_scaled];
-            [left_scaled]drawtext=fontfile={fontPath}:text='Left':x=5:y=h-30:fontsize=20:fontcolor=white[left_labeled];
+            [left_scaled]drawtext=fontfile={fontPath}:text='Left':x=5:y=h-25:fontsize=20:fontcolor=white[left_labeled];
             [4:v]scale={resolution}[right_scaled];
-            [right_scaled]drawtext=fontfile={fontPath}:text='Right':x=5:y=h-30:fontsize=20:fontcolor=white[right_labeled];
+            [right_scaled]drawtext=fontfile={fontPath}:text='Right':x=5:y=h-25:fontsize=20:fontcolor=white[right_labeled];
 
             [0:v][front_labeled]overlay={cameraPadding}:{cameraPadding}:shortest=1[front_overlay];
             [front_overlay][back_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:{cameraPadding}:shortest=1[back_overlay];
@@ -94,7 +94,7 @@ public class FFmpegHandler
         await RunFFmpegProcessAsync(arguments);
     }
 
-    private async Task RunFFmpegProcessAsync(params IEnumerable<string> arguments)
+    private static async Task RunFFmpegProcessAsync(params IEnumerable<string> arguments)
     {
         var result = await Cli.Wrap("ffmpeg")
             .WithArguments(arguments)
@@ -106,28 +106,36 @@ public class FFmpegHandler
         }
     }
 
-    public bool TryLoadFFmpeg()
+    public static bool TryLoadFFmpeg()
     {
-        var directories = PackageManager.FindFFmpegPaths();
+        var directories = PackageManager.FindFFmpegDirectories();
 
-        var loaded = false;
         foreach (var directory in directories)
         {
             Library.FFmpegDirectory = directory;
 
-            Log.Error($"Found ffmpeg: {directory}");
+            Log.Debug($"Loading {directory}");
             try
             {
-                Library.LoadFFmpeg();
+                var loaded = Library.LoadFFmpeg();
+
+                if (loaded)
+                {
+                    Log.Information($"Loaded ffmpeg from {directory}");
+                    return true;
+                }
+                else
+                {
+                    Log.Error("Failed to load ffmpeg because it was already loaded");
+                    return false;
+                }
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException ex)
             {
-                Log.Error($"Couldn't load from {directory}");
+                Log.Error(ex, "Failed to load ffmpeg");
             }
         }
 
-        Log.Debug($"Loaded ffmpeg: {loaded}");
-
-        return loaded;
+        return false;
     }
 }

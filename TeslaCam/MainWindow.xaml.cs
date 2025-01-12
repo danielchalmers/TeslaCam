@@ -59,11 +59,11 @@ public partial class MainWindow : Window
             if (CurrentClip is not null)
             {
                 IsProcessing = true;
+
                 Log.Debug($"Starting new clip: {CurrentClip.FullPath}");
                 var path = await _ffmpeg.StartNewClip(CurrentClip);
-                Log.Debug($"Opening media: {path}");
                 await MediaElement.Open(new Uri(path));
-                await MediaElement.Play();
+
                 IsProcessing = false;
             }
         }
@@ -71,11 +71,11 @@ public partial class MainWindow : Window
 
     private async void Window_ContentRendered(object sender, EventArgs e)
     {
-        var loaded = _ffmpeg.TryLoadFFmpeg();
+        var loaded = FFmpegHandler.TryLoadFFmpeg();
 
         if (!loaded)
         {
-            var shouldInstall = MessageBox.Show(this, "You need ffmpeg to play clips. Do you want to download it now?", App.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
+            var shouldInstall = MessageBox.Show(this, "You need ffmpeg to play clips. Download it now?", App.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
 
             if (shouldInstall)
             {
@@ -90,13 +90,13 @@ public partial class MainWindow : Window
                     MessageBox.Show(this, $"Failed to download ffmpeg: {ex.Message}", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
-                loaded = _ffmpeg.TryLoadFFmpeg();
+                loaded = FFmpegHandler.TryLoadFFmpeg();
 
                 IsProcessing = false;
 
                 if (!loaded)
                 {
-                    MessageBox.Show(this, "Failed to load ffmpeg. You won't be able to play any clips.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(this, "Failed to load ffmpeg. You won't be able to play clips.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
@@ -156,6 +156,11 @@ public partial class MainWindow : Window
         }
 
         LoadClips(dialog.FolderNames);
+    }
+
+    private void MediaElement_MediaOpened(object sender, MediaOpenedEventArgs e)
+    {
+        Log.Debug($"Media: Opened {e.Info.MediaSource}");
     }
 
     private void MediaElement_MediaEnded(object sender, EventArgs e)

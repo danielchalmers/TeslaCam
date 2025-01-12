@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
@@ -16,7 +17,7 @@ namespace TeslaCam;
 [ObservableObject]
 public partial class MainWindow : Window
 {
-    private readonly FFmpegHandler _ffmpeg;
+    private readonly FFmpegHandler _ffmpeg = new();
     private readonly List<CamClip> _clips = [];
 
     [ObservableProperty]
@@ -35,8 +36,6 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = this;
         PropertyChanged += OnPropertyChanged;
-
-        _ffmpeg = new("ffmpeg");
 
         LoadClips(CamStorage.FindCommonRoots());
     }
@@ -69,7 +68,9 @@ public partial class MainWindow : Window
 
     private async void Window_ContentRendered(object sender, EventArgs e)
     {
-        var installed = await PackageManager.CheckIfFFmpegInstalled();
+        var ffmpegPath = await PackageManager.FindFFmpegPath();
+
+        var installed = string.IsNullOrWhiteSpace(ffmpegPath) || await PackageManager.CheckIfFFmpegInstalled();
         if (!installed)
         {
             var shouldInstall = MessageBox.Show("ffmpeg is not installed. Do you want to install it now?", "TeslaCam", MessageBoxButton.OKCancel) == MessageBoxResult.OK;
@@ -89,6 +90,8 @@ public partial class MainWindow : Window
                 return;
             }
         }
+
+        Library.FFmpegDirectory = Path.GetDirectoryName(ffmpegPath);
     }
 
     private void LoadClips(params IEnumerable<string> roots)

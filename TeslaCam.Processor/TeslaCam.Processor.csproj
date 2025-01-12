@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <PackageReference Include="CliWrap" Version="3.7.0" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\TeslaCam.Data\TeslaCam.Data.csproj" />
   </ItemGroup>
 </Project>

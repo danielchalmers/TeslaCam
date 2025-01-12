@@ -1,19 +1,16 @@
-﻿using System.Diagnostics;
+﻿using CliWrap;
 using TeslaCam.Data;
 
 namespace TeslaCam.Processor;
 
 public class FFmpegHandler
 {
-    private readonly string _ffmpegPath;
     private string _workingFile;
     private CamClip _currentClip;
     private LinkedListNode<CamChunk> _currentChunk;
 
-    public FFmpegHandler(string ffmpegPath)
+    public FFmpegHandler()
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(ffmpegPath, nameof(ffmpegPath));
-        _ffmpegPath = ffmpegPath;
         _workingFile = Path.Combine(Path.GetTempPath(), "TeslaCam-working-file.mp4");
     }
 
@@ -97,11 +94,13 @@ public class FFmpegHandler
 
     private async Task RunFFmpegProcessAsync(params IEnumerable<string> arguments)
     {
-        var process = await PackageManager.RunProcessAsync(_ffmpegPath, arguments);
+        var result = await Cli.Wrap("ffmpeg")
+            .WithArguments(arguments)
+            .ExecuteAsync();
 
-        if (process.ExitCode != 0)
+        if (!result.IsSuccess)
         {
-            throw new Exception($"FFmpeg exited with code {process.ExitCode}");
+            throw new Exception($"FFmpeg exited with code {result.ExitCode}");
         }
     }
 }

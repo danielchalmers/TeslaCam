@@ -1,8 +1,11 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 using Serilog;
 using TeslaCam.Data;
+using Unosquare.FFME;
+using Unosquare.FFME.Common;
 
 namespace TeslaCam;
 
@@ -12,40 +15,30 @@ namespace TeslaCam;
 [ObservableObject]
 public partial class MainWindow : Window
 {
+    private readonly FFmpegHandler _ffmpeg = new();
     private readonly List<CamClip> _clips = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Clips))]
     private CamClip _currentClip;
 
     [ObservableProperty]
     private string _errorMessage;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Clips))]
     private string _filterText = string.Empty;
+
+    [ObservableProperty]
+    private bool _isProcessing;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = this;
+        PropertyChanged += OnPropertyChanged;
 
-        var roots = CamStorage.FindCommonRoots().ToList();
-
-        if (roots.Count == 0)
-        {
-            Log.Information("No common root folders found");
-            ErrorMessage = "No TeslaCam folders found";
-        }
-        else
-        {
-            foreach (var root in roots)
-            {
-                Log.Information($"Found root folder: {root}");
-                var storage = CamStorage.Map(root);
-                _clips.AddRange(storage.Clips);
-            }
-        }
-
-        CurrentClip = Clips.FirstOrDefault();
+        LoadClips(CamStorage.FindCommonRoots());
     }
 
     /// <summary>
@@ -57,13 +50,90 @@ public partial class MainWindow : Window
         .ThenBy(x => x.Name) // If the timestamp couldn't be found the clip will go to the bottom where we then order by the folder name.
         .ToList();
 
-    partial void OnCurrentClipChanging(CamClip oldValue, CamClip newValue)
+    protected async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        Log.Information($"Clip changed from {oldValue?.ToString() ?? "none"} to {newValue?.ToString() ?? "none"}");
+        if (e.PropertyName == nameof(CurrentClip) && Library.IsInitialized)
+        {
+            await MediaElement.Close();
+
+            if (CurrentClip is not null)
+            {
+                IsProcessing = true;
+
+                Log.Debug($"Starting new clip: {CurrentClip.FullPath}");
+                var path = await _ffmpeg.StartNewClip(CurrentClip);
+                await MediaElement.Open(new Uri(path));
+
+                IsProcessing = false;
+            }
+        }
     }
 
-    partial void OnFilterTextChanged(string oldValue, string newValue)
+    private async void Window_ContentRendered(object sender, EventArgs e)
     {
+        var loaded = FFmpegHandler.TryLoadFFmpeg();
+
+        if (!loaded)
+        {
+            var shouldInstall = MessageBox.Show(this, "You need ffmpeg to play clips. Download it now?", App.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
+
+            if (shouldInstall)
+            {
+                IsProcessing = true;
+
+                try
+                {
+                    await PackageManager.DownloadAndExtractFFmpeg();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, $"Failed to download ffmpeg: {ex.Message}", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+                loaded = FFmpegHandler.TryLoadFFmpeg();
+
+                IsProcessing = false;
+
+                if (!loaded)
+                {
+                    MessageBox.Show(this, "Failed to load ffmpeg. You won't be able to play clips.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                Log.Error("User didn't want to download ffmpeg");
+            }
+        }
+    }
+
+    private void LoadClips(params IEnumerable<string> roots)
+    {
+        ErrorMessage = null;
+        CurrentClip = null;
+        _clips.Clear();
+
+        if (!roots.Any())
+        {
+            Log.Information("No roots found");
+            ErrorMessage = "No TeslaCam folders found";
+        }
+
+        foreach (var root in roots)
+        {
+            Log.Information($"Found root folder: {root}");
+
+            try
+            {
+                var storage = CamStorage.Map(root);
+                _clips.AddRange(storage.Clips);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Error(ex, "Access to folder was denied");
+                ErrorMessage = "Access to folder was denied";
+            }
+        }
+
         OnPropertyChanged(nameof(Clips));
     }
 
@@ -71,8 +141,11 @@ public partial class MainWindow : Window
     {
         Log.Debug("User is selecting a folder");
 
-        var dialog = new OpenFolderDialog();
-        dialog.Title = "Select a folder containing dashcam footage";
+        var dialog = new OpenFolderDialog
+        {
+            Multiselect = true,
+            Title = "Select a folder containing dashcam footage",
+        };
 
         var result = dialog.ShowDialog();
 
@@ -82,29 +155,21 @@ public partial class MainWindow : Window
             return;
         }
 
-        Log.Information($"Using new root folder: {dialog.FolderName}");
+        LoadClips(dialog.FolderNames);
+    }
 
-        // The user has committed at this point, even if it doesn't end up loading. Lets clear the current state.
-        ErrorMessage = null;
-        CurrentClip = null;
-        _clips.Clear();
-        OnPropertyChanged(nameof(Clips));
+    private void MediaElement_MediaOpened(object sender, MediaOpenedEventArgs e)
+    {
+        Log.Debug($"Media: Opened {e.Info.MediaSource}");
+    }
 
-        CamStorage storage;
-        try
-        {
-            storage = CamStorage.Map(dialog.FolderName);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            Log.Error(ex, "Access to selected folder was denied");
-            ErrorMessage = "Access to folder denied";
-            return;
-        }
+    private void MediaElement_MediaEnded(object sender, EventArgs e)
+    {
+        Log.Debug("Media: Ended");
+    }
 
-        _clips.AddRange(storage.Clips);
-        OnPropertyChanged(nameof(Clips));
-
-        CurrentClip = Clips.FirstOrDefault();
+    private void MediaElement_MediaFailed(object sender, MediaFailedEventArgs e)
+    {
+        Log.Error(e.ErrorException, "Media: Failed");
     }
 }

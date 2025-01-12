@@ -4,11 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TeslaCam"
+        xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
-        Title="TeslaCam Player"
+        Title="{x:Static local:App.Title}"
         MinWidth="1200"
-        MinHeight="600">
+        MinHeight="600"
+        ContentRendered="Window_ContentRendered">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350" />
@@ -80,60 +82,26 @@
                     Margin="0,8,0,0" />
         </Grid>
 
-        <Viewbox Grid.Column="2" Stretch="Uniform">
-            <!--  Camera: HW3 = 1280x960, HW4 = 2896x1876.  -->
-            <!--  Use HW3 as the base resolution and scale it for other aspect ratios.  -->
-            <Grid Height="960">
-                <!--  Main feed covering the whole view  -->
-                <local:CameraView CamClip="{Binding CurrentClip}" CameraPath="front" />
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-                <!--  Overlay for mini camera views  -->
-                <Grid Background="Transparent" Margin="24">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+            <Viewbox Grid.Row="0" Stretch="Uniform">
+                <!--  Use HW3 (HW3 = 1280x960, HW4 = 2896x1876) as the base resolution and scale it for other aspect ratios.  -->
+                <ffme:MediaElement x:Name="MediaElement"
+                                   Height="960"
+                                   LoadedBehavior="Play"
+                                   SpeedRatio="6"
+                                   MediaOpened="MediaElement_MediaOpened"
+                                   MediaEnded="MediaElement_MediaEnded"
+                                   MediaFailed="MediaElement_MediaFailed" />
+            </Viewbox>
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <!--  Top Left feed  -->
-                    <local:CameraView Grid.Column="0"
-                                      Grid.Row="0"
-                                      Mini="True"
-                                      CamClip="{Binding CurrentClip}"
-                                      CameraPath="front"
-                                      CameraName="Front" />
-
-                    <!--  Top Right feed  -->
-                    <local:CameraView Grid.Column="2"
-                                      Grid.Row="0"
-                                      Mini="True"
-                                      CamClip="{Binding CurrentClip}"
-                                      CameraPath="back"
-                                      CameraName="Back" />
-
-                    <!--  Bottom Left feed  -->
-                    <local:CameraView Grid.Column="0"
-                                      Grid.Row="2"
-                                      Mini="True"
-                                      CamClip="{Binding CurrentClip}"
-                                      CameraPath="left_repeater"
-                                      CameraName="Left" />
-
-                    <!--  Bottom Right feed  -->
-                    <local:CameraView Grid.Column="2"
-                                      Grid.Row="2"
-                                      Mini="True"
-                                      CamClip="{Binding CurrentClip}"
-                                      CameraPath="right_repeater"
-                                      CameraName="Right" />
-                </Grid>
-            </Grid>
-        </Viewbox>
+            <ProgressBar Grid.Row="1"
+                         IsIndeterminate="True"
+                         Visibility="{Binding IsProcessing, Converter={local:BooleanToVisibilityConverter}}" />
+        </Grid>
     </Grid>
 </Window>

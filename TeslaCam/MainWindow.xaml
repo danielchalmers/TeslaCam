@@ -7,7 +7,7 @@
         xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
-        Title="TeslaCam Player"
+        Title="{x:Static local:App.Title}"
         MinWidth="1200"
         MinHeight="600"
         ContentRendered="Window_ContentRendered">
@@ -19,7 +19,8 @@
         </Grid.ColumnDefinitions>
 
         <!--  Sidebar  -->
-        <Grid Grid.Column="0">
+        <Grid Grid.Column="0"
+                      IsEnabled="{Binding Source={x:Static ffme:Library.IsInitialized}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />

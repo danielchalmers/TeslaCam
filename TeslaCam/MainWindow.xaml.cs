@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel;
-using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Win32;
 using Serilog;
 using TeslaCam.Data;
-using TeslaCam.Processor;
 using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
@@ -71,55 +69,30 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task<bool> TryLoadFFmpeg()
-    {
-        var ffmpegPaths = await PackageManager.FindFFmpegPaths();
-
-        // Try loading all the found ffmpeg paths.
-        var loaded = false;
-        foreach (var ffmpegPath in ffmpegPaths)
-        {
-            Library.FFmpegDirectory = Path.GetDirectoryName(ffmpegPath);
-
-            try
-            {
-                Library.LoadFFmpeg();
-            }
-            catch (FileNotFoundException ex)
-            {
-                Log.Debug($"FFmpeg not found at: {ex.FileName}");
-            }
-        }
-
-        return loaded;
-    }
-
     private async void Window_ContentRendered(object sender, EventArgs e)
     {
-        var loaded = await TryLoadFFmpeg();
+        var loaded = await _ffmpeg.TryLoadFFmpeg();
 
         if (!loaded)
         {
-            var shouldInstall = MessageBox.Show("ffmpeg is not installed. Do you want to install it now?", "TeslaCam", MessageBoxButton.OKCancel) == MessageBoxResult.OK;
+            var shouldInstall = MessageBox.Show("ffmpeg is not installed. Do you want to install it now?", App.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
 
-            if (!shouldInstall)
+            if (shouldInstall)
             {
-                Log.Information("User didn't want to install ffmpeg");
-                Close();
-                return;
+                IsProcessing = true;
+                loaded = await PackageManager.InstallFFmpeg();
+                IsProcessing = false;
+
+                if (!loaded)
+                {
+                    MessageBox.Show("Failed to install ffmpeg. Please install it manually.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Close();
+                }
             }
-
-            Log.Information("Installing ffmpeg");
-            IsProcessing = true;
-            loaded = await PackageManager.InstallWinGetPackage("Gyan.FFmpeg.Shared");
-            IsProcessing = false;
-
-            if (!loaded)
+            else
             {
-                MessageBox.Show("Failed to install ffmpeg. Please install it manually.", "TeslaCam", MessageBoxButton.OK);
-                Log.Error("Failed to install ffmpeg");
+                Log.Error("User didn't want to install ffmpeg");
                 Close();
-                return;
             }
         }
     }

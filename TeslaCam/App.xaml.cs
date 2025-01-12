@@ -7,6 +7,8 @@ namespace TeslaCam;
 /// </summary>
 public partial class App : Application
 {
+    public static string Title { get; } = "TeslaCam Player";
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);

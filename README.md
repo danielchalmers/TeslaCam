@@ -1,4 +1,6 @@
-# TeslaCam Player
+# Sentry Replay
 
-TeslaCam Player is a Windows application designed to help you view and manage Tesla dashcam videos directly on your computer.
-It provides an easy-to-use interface for browsing through your TeslaCam footage, viewing video clips, and inspecting recorded events.
+[![Release](https://img.shields.io/github/release/danielchalmers/TeslaCam?include_prereleases)](https://github.com/danielchalmers/TeslaCam/releases)
+[![License](https://img.shields.io/github/license/danielchalmers/TeslaCam)](LICENSE)
+
+An app that lets you view your Tesla's dashcam videos directly on your computer.

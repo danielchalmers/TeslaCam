@@ -7,7 +7,6 @@ public class FFmpegHandler
 {
     private readonly string _ffmpegPath;
     private string _workingFile;
-    private Process _ffmpegProcess;
     private CamClip _currentClip;
     private LinkedListNode<CamChunk> _currentChunk;
 
@@ -93,52 +92,16 @@ public class FFmpegHandler
         };
 
 
-        await RunFFmpegProcessAsync(arguments.ToArray());
+        await RunFFmpegProcessAsync(arguments);
     }
 
-    /// <summary>
-    /// Runs an FFmpeg process with the specified arguments.
-    /// </summary>
-    /// <param name="arguments">FFmpeg command-line arguments as a params array.</param>
-    private async Task RunFFmpegProcessAsync(params string[] arguments)
+    private async Task RunFFmpegProcessAsync(params IEnumerable<string> arguments)
     {
-        var argumentString = string.Join(" ", arguments.Select(arg => arg.Contains(' ') ? $"\"{arg}\"" : arg));
+        var process = await PackageManager.RunProcessAsync(_ffmpegPath, arguments);
 
-        var processStartInfo = new ProcessStartInfo
+        if (process.ExitCode != 0)
         {
-            FileName = _ffmpegPath,
-            Arguments = argumentString,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        _ffmpegProcess = new()
-        {
-            StartInfo = processStartInfo
-        };
-
-        try
-        {
-            _ffmpegProcess.Start();
-
-            // Capture and log FFmpeg errors
-            var errorLog = await _ffmpegProcess.StandardError.ReadToEndAsync();
-            if (!string.IsNullOrWhiteSpace(errorLog))
-            {
-                Debug.WriteLine(errorLog);
-            }
-
-            await _ffmpegProcess.WaitForExitAsync();
-
-            if (_ffmpegProcess.ExitCode != 0)
-            {
-                throw new Exception($"FFmpeg process exited with code {_ffmpegProcess.ExitCode}. Check logs for details.");
-            }
-        }
-        finally
-        {
-            _ffmpegProcess?.Dispose();
+            throw new Exception($"FFmpeg exited with code {process.ExitCode}");
         }
     }
 }

@@ -69,7 +69,7 @@ public partial class MainWindow : Window
 
     private async void Window_ContentRendered(object sender, EventArgs e)
     {
-        var installed = await PackageInstaller.CheckIfFfmpegInstalled();
+        var installed = await PackageManager.CheckIfFFmpegInstalled();
         if (!installed)
         {
             var shouldInstall = MessageBox.Show("ffmpeg is not installed. Do you want to install it now?", "TeslaCam", MessageBoxButton.OKCancel) == MessageBoxResult.OK;
@@ -80,7 +80,7 @@ public partial class MainWindow : Window
                 return;
             }
 
-            installed = await PackageInstaller.InstallWinGetPackage("ffmpeg");
+            installed = await PackageManager.InstallWinGetPackage("ffmpeg");
 
             if (!installed)
             {

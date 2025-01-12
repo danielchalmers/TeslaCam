@@ -108,21 +108,21 @@ public class FFmpegHandler
 
     public bool TryLoadFFmpeg()
     {
-        var ffmpegPaths = PackageManager.FindFFmpegPaths();
+        var directories = PackageManager.FindFFmpegPaths();
 
         var loaded = false;
-        foreach (var ffmpegPath in ffmpegPaths)
+        foreach (var directory in directories)
         {
-            Library.FFmpegDirectory = Path.GetDirectoryName(ffmpegPath);
+            Library.FFmpegDirectory = directory;
 
-            Log.Error($"Found ffmpeg: {ffmpegPath}");
+            Log.Error($"Found ffmpeg: {directory}");
             try
             {
                 Library.LoadFFmpeg();
             }
             catch (FileNotFoundException)
             {
-                Log.Error($"Couldn't load from {Library.FFmpegDirectory}");
+                Log.Error($"Couldn't load from {directory}");
             }
         }
 

@@ -75,32 +75,34 @@ public partial class MainWindow : Window
 
         if (!loaded)
         {
-            var shouldInstall = MessageBox.Show(this, "ffmpeg is not installed. Do you want to install it now?", App.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
+            var shouldInstall = MessageBox.Show(this, "You need ffmpeg to play clips. Do you want to download it now?", App.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
 
-            if (!shouldInstall)
+            if (shouldInstall)
             {
-                Log.Error("User didn't want to install ffmpeg");
-                Close();
-                return;
+                IsProcessing = true;
+
+                try
+                {
+                    await PackageManager.DownloadAndExtractFFmpeg();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, $"Failed to download ffmpeg: {ex.Message}", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+                loaded = _ffmpeg.TryLoadFFmpeg();
+
+                IsProcessing = false;
+
+                if (!loaded)
+                {
+                    MessageBox.Show(this, "Failed to load ffmpeg. You won't be able to play any clips.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-
-            IsProcessing = true;
-            loaded = await PackageManager.InstallFFmpeg();
-            IsProcessing = false;
-
-            if (!loaded)
+            else
             {
-                MessageBox.Show(this, "Failed to install ffmpeg. Please install it manually.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                Close();
-                return;
+                Log.Error("User didn't want to download ffmpeg");
             }
-
-            loaded = _ffmpeg.TryLoadFFmpeg();
-        }
-
-        if (!loaded)
-        {
-            MessageBox.Show(this, "Failed to load ffmpeg. You won't be able to play any clips.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

@@ -1,50 +1,50 @@
 ﻿using System.IO;
-using CliWrap;
+using System.IO.Compression;
+using System.Net.Http;
 using Serilog;
 
 namespace TeslaCam;
 
 public static class PackageManager
 {
-    public static async Task<bool> InstallWinGetPackage(string name)
+    private static async Task DownloadFile(string url, string savePath)
     {
-        Log.Information($"Installing {name} using winget...");
-        var wingetInstalled = (await Cli.Wrap("winget")
-            .WithArguments("--version")
-            .ExecuteAsync())
-            .IsSuccess;
-
-        if (!wingetInstalled)
+        using var client = new HttpClient();
+        var response = await client.GetAsync(url);
+        if (response.IsSuccessStatusCode)
         {
-            Log.Error($"winget is not installed");
-            return false;
-        }
-
-        var installResult = await Cli.Wrap("winget")
-            .WithArguments(["install", name])
-            .ExecuteAsync();
-
-        Log.Information($"Installed: {installResult}");
-
-        return installResult.IsSuccess;
-    }
-
-    public static Task<bool> InstallFFmpeg() => InstallWinGetPackage("Gyan.FFmpeg.Shared");
-
-    private static IEnumerable<string> FindFilePathsFromEnvironmentVariables(string fileName)
-    {
-        var pathVariable = Environment.GetEnvironmentVariable("PATH");
-
-        foreach (var directory in pathVariable.Split(Path.PathSeparator))
-        {
-            var fullPath = Path.Combine(directory, fileName);
-
-            if (File.Exists(fullPath))
-            {
-                yield return fullPath;
-            }
+            using var fileStream = File.Create(savePath);
+            await response.Content.CopyToAsync(fileStream);
         }
     }
 
-    public static IEnumerable<string> FindFFmpegPaths() => FindFilePathsFromEnvironmentVariables("ffmpeg.exe");
+    private static void ExtractZipFile(string zipFilePath, string extractPath)
+    {
+        ZipFile.ExtractToDirectory(zipFilePath, extractPath, true);
+    }
+
+    public static async Task DownloadAndExtractFFmpeg()
+    {
+        var outputFolder = "ffmpeg";
+        var url = "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl-shared.zip"; // TODO: ARM64 builds?
+        var tempPath = Path.GetTempFileName();
+
+        Log.Information("Getting ffmpeg");
+
+        Log.Debug($"Downloading ffmpeg to {tempPath} from {url}");
+        await DownloadFile(url, tempPath);
+
+        Log.Debug($"Extracting ffmpeg to {outputFolder}");
+        ExtractZipFile(tempPath, outputFolder);
+
+        File.Delete(tempPath);
+    }
+
+    public static IEnumerable<string> FindFFmpegPaths()
+    {
+        foreach (var path in Directory.EnumerateFiles(".", "ffmpeg.exe", SearchOption.AllDirectories))
+        {
+            yield return Path.GetFullPath(Path.GetDirectoryName(path));
+        }
+    }
 }

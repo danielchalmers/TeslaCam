@@ -19,8 +19,7 @@
         </Grid.ColumnDefinitions>
 
         <!--  Sidebar  -->
-        <Grid Grid.Column="0"
-                      IsEnabled="{Binding Source={x:Static ffme:Library.IsInitialized}}">
+        <Grid Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />

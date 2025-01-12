@@ -1,4 +1,5 @@
-﻿using CliWrap;
+﻿using System.IO;
+using CliWrap;
 using Serilog;
 
 namespace TeslaCam;
@@ -28,13 +29,22 @@ public static class PackageManager
         return installResult.IsSuccess;
     }
 
-    public static async Task<bool> CheckIfFFmpegInstalled()
+    public static Task<bool> InstallFFmpeg() => InstallWinGetPackage("Gyan.FFmpeg.Shared");
+
+    private static IEnumerable<string> FindFilePathsFromEnvironmentVariables(string fileName)
     {
-        return (await Cli.Wrap("ffmpeg")
-            .WithArguments("-version")
-            .ExecuteAsync())
-            .IsSuccess;
+        var pathVariable = Environment.GetEnvironmentVariable("PATH");
+
+        foreach (var directory in pathVariable.Split(Path.PathSeparator))
+        {
+            var fullPath = Path.Combine(directory, fileName);
+
+            if (File.Exists(fullPath))
+            {
+                yield return fullPath;
+            }
+        }
     }
 
-    public static Task<bool> InstallFFmpeg() => InstallWinGetPackage("Gyan.FFmpeg.Shared");
+    public static IEnumerable<string> FindFFmpegPaths() => FindFilePathsFromEnvironmentVariables("ffmpeg.exe");
 }

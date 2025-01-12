@@ -71,29 +71,36 @@ public partial class MainWindow : Window
 
     private async void Window_ContentRendered(object sender, EventArgs e)
     {
-        var loaded = await _ffmpeg.TryLoadFFmpeg();
+        var loaded = _ffmpeg.TryLoadFFmpeg();
 
         if (!loaded)
         {
-            var shouldInstall = MessageBox.Show("ffmpeg is not installed. Do you want to install it now?", App.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
+            var shouldInstall = MessageBox.Show(this, "ffmpeg is not installed. Do you want to install it now?", App.Title, MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
 
-            if (shouldInstall)
-            {
-                IsProcessing = true;
-                loaded = await PackageManager.InstallFFmpeg();
-                IsProcessing = false;
-
-                if (!loaded)
-                {
-                    MessageBox.Show("Failed to install ffmpeg. Please install it manually.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
-                    Close();
-                }
-            }
-            else
+            if (!shouldInstall)
             {
                 Log.Error("User didn't want to install ffmpeg");
                 Close();
+                return;
             }
+
+            IsProcessing = true;
+            loaded = await PackageManager.InstallFFmpeg();
+            IsProcessing = false;
+
+            if (!loaded)
+            {
+                MessageBox.Show(this, "Failed to install ffmpeg. Please install it manually.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+                return;
+            }
+
+            loaded = _ffmpeg.TryLoadFFmpeg();
+        }
+
+        if (!loaded)
+        {
+            MessageBox.Show(this, "Failed to load ffmpeg. You won't be able to play any clips.", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

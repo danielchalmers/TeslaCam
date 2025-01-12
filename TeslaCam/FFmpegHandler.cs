@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using CliWrap;
-using CliWrap.Buffered;
 using Serilog;
 using TeslaCam.Data;
 using Unosquare.FFME;
@@ -107,37 +106,28 @@ public class FFmpegHandler
         }
     }
 
-    public async Task<bool> TryLoadFFmpeg()
+    public bool TryLoadFFmpeg()
     {
-        var ffmpegPaths = await FindFFmpegPaths();
+        var ffmpegPaths = PackageManager.FindFFmpegPaths();
 
-        // Try loading all the found ffmpeg paths.
         var loaded = false;
         foreach (var ffmpegPath in ffmpegPaths)
         {
             Library.FFmpegDirectory = Path.GetDirectoryName(ffmpegPath);
 
+            Log.Error($"Found ffmpeg: {ffmpegPath}");
             try
             {
                 Library.LoadFFmpeg();
             }
-            catch (FileNotFoundException ex)
+            catch (FileNotFoundException)
             {
-                Log.Error($"FFmpeg not found at: {ex.FileName}");
+                Log.Error($"Couldn't load from {Library.FFmpegDirectory}");
             }
         }
 
         Log.Debug($"Loaded ffmpeg: {loaded}");
 
         return loaded;
-    }
-
-    public async Task<string[]> FindFFmpegPaths()
-    {
-        var result = await Cli.Wrap("where")
-            .WithArguments("ffmpeg")
-            .ExecuteBufferedAsync();
-
-        return result.StandardOutput.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
     }
 }

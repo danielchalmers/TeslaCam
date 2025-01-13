@@ -61,8 +61,13 @@ public partial class MainWindow : Window
                 IsProcessing = true;
 
                 Log.Debug($"Starting new clip: {CurrentClip.FullPath}");
+
                 var path = await _ffmpeg.StartNewClip(CurrentClip);
-                await MediaElement.Open(new Uri(path));
+
+                if (path is not null)
+                {
+                    await MediaElement.Open(new Uri(path));
+                }
 
                 IsProcessing = false;
             }
@@ -171,5 +176,10 @@ public partial class MainWindow : Window
     private void MediaElement_MediaFailed(object sender, MediaFailedEventArgs e)
     {
         Log.Error(e.ErrorException, "Media: Failed");
+    }
+
+    private void Window_Closing(object sender, CancelEventArgs e)
+    {
+        _ffmpeg.Dispose();
     }
 }

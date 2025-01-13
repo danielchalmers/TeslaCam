@@ -10,7 +10,8 @@
         Title="{x:Static local:App.Title}"
         MinWidth="1200"
         MinHeight="600"
-        ContentRendered="Window_ContentRendered">
+        ContentRendered="Window_ContentRendered"
+        Closing="Window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350" />

@@ -7,11 +7,12 @@ using Unosquare.FFME;
 
 namespace TeslaCam;
 
-public class FFmpegHandler
+public class FFmpegHandler : IDisposable
 {
     private readonly string _workingFile;
     private CamClip _currentClip;
     private LinkedListNode<CamChunk> _currentChunk;
+    private CancellationTokenSource _cts = new();
 
     public FFmpegHandler()
     {
@@ -20,6 +21,7 @@ public class FFmpegHandler
 
     public Task<string> StartNewClip(CamClip clip)
     {
+        _cts.Cancel();
         _currentClip = clip;
         _currentChunk = null;
         return CreateVideoForNextChunk();
@@ -28,7 +30,17 @@ public class FFmpegHandler
     public async Task<string> CreateVideoForNextChunk()
     {
         _currentChunk = _currentChunk?.Next ?? _currentClip.Chunks.First;
-        await RenderChunk(_currentChunk.Value, _workingFile);
+
+        try
+        {
+            await RenderChunk(_currentChunk.Value, _workingFile);
+        }
+        catch (OperationCanceledException)
+        {
+            Log.Error("Render stopped");
+            return null;
+        }
+
         return _workingFile;
     }
 
@@ -107,10 +119,12 @@ public class FFmpegHandler
 
     private async Task ExecuteAsync(params IEnumerable<string> arguments)
     {
+        _cts = new();
+
         var result = await Cli.Wrap("ffmpeg")
             .WithArguments(arguments)
             .WithWorkingDirectory(Library.FFmpegDirectory)
-            .ExecuteBufferedAsync();
+            .ExecuteBufferedAsync(_cts.Token);
 
         if (!result.IsSuccess)
         {
@@ -149,5 +163,11 @@ public class FFmpegHandler
         }
 
         return false;
+    }
+
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
     }
 }

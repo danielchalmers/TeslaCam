@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using CliWrap;
+using CliWrap.Buffered;
 using Serilog;
 using TeslaCam.Data;
 using Unosquare.FFME;
@@ -20,24 +21,18 @@ public class FFmpegHandler
     public Task<string> StartNewClip(CamClip clip)
     {
         _currentClip = clip;
+        _currentChunk = null;
         return CreateVideoForNextChunk();
     }
 
     public async Task<string> CreateVideoForNextChunk()
     {
         _currentChunk = _currentChunk?.Next ?? _currentClip.Chunks.First;
-        await OverlayCamerasAsync(_currentChunk.Value, _workingFile);
+        await RenderChunk(_currentChunk.Value, _workingFile);
         return _workingFile;
     }
 
-    /// <summary>
-    /// Overlays four camera videos on top of a main video, each labeled with its respective camera name.
-    /// If a camera is missing, a half-transparent black square is displayed in its place.
-    /// </summary>
-    /// <param name="chunk">The CamChunk containing the files of camera videos.</param>
-    /// <param name="outputFile">The output video file path.</param>
-    /// <returns>Task representing the overlay process.</returns>
-    private async Task OverlayCamerasAsync(CamChunk chunk, string outputFile, string selectedCamera = "front")
+    private async Task RenderChunk(CamChunk chunk, string outputFile, string primary = "front")
     {
         if (chunk == null || !chunk.Files.Any())
             throw new ArgumentException("Chunk cannot be null or empty.", nameof(chunk));
@@ -45,42 +40,43 @@ public class FFmpegHandler
         if (string.IsNullOrWhiteSpace(outputFile))
             throw new ArgumentException("Output file path cannot be null or empty.", nameof(outputFile));
 
+        if (!File.Exists(chunk.Files[primary].FullPath))
+            throw new ArgumentException("Primary camera file does not exist.", nameof(primary));
+
         // Common settings
-        var fontPath = "C:/Windows/Fonts/SegoeUI.ttf";
         var resolution = "256x192";
         var cameraPadding = 30;
 
         var filterComplex = $@"
             [1:v]scale={resolution}[top_left_scaled];
-            [top_left_scaled]drawtext=fontfile={fontPath}:text='Front':x=5:y=h-25:fontsize=20:fontcolor=white[top_left_labeled];
+            [top_left_scaled]drawtext=text='Front':x=5:y=h-25:fontsize=20:fontcolor=white[top_left_labeled];
             [2:v]scale={resolution}[top_right_scaled];
-            [top_right_scaled]drawtext=fontfile={fontPath}:text='Back':x=5:y=h-25:fontsize=20:fontcolor=white[top_right_labeled];
+            [top_right_scaled]drawtext=text='Back':x=5:y=h-25:fontsize=20:fontcolor=white[top_right_labeled];
             [3:v]scale={resolution}[bottom_left_scaled];
-            [bottom_left_scaled]drawtext=fontfile={fontPath}:text='Left':x=5:y=h-25:fontsize=20:fontcolor=white[bottom_left_labeled];
+            [bottom_left_scaled]drawtext=text='Left':x=5:y=h-25:fontsize=20:fontcolor=white[bottom_left_labeled];
             [4:v]scale={resolution}[bottom_right_scaled];
-            [bottom_right_scaled]drawtext=fontfile={fontPath}:text='Right':x=5:y=h-25:fontsize=20:fontcolor=white[bottom_right_labeled];
+            [bottom_right_scaled]drawtext=text='Right':x=5:y=h-25:fontsize=20:fontcolor=white[bottom_right_labeled];
 
             [0:v][top_left_labeled]overlay={cameraPadding}:{cameraPadding}:shortest=1[top_left_overlay];
             [top_left_overlay][top_right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:{cameraPadding}:shortest=1[top_right_overlay];
             [top_right_overlay][bottom_left_labeled]overlay={cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}:shortest=1[bottom_left_overlay];
-            [bottom_left_overlay][bottom_right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}[output]";
-
+            [bottom_left_overlay][bottom_right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}:shortest=1[output]";
 
         List<string> args = [
             "-y", // Overwrite existing files
-            "-i", $@"{chunk.Files[selectedCamera].FullPath}",
+            "-i", $@"{chunk.Files[primary].FullPath}",
         ];
 
         void AddCam(string name)
         {
             var file = chunk.Files.GetValueOrDefault(name);
 
-            if (file is null || file.Camera == selectedCamera)
+            if (file is null || file.Camera == primary)
             {
                 args.Add("-f");
                 args.Add("lavfi");
                 args.Add("-i");
-                args.Add($"color=black@0.5:size={resolution}:rate=30");
+                args.Add($"color=black");
             }
             else
             {
@@ -101,24 +97,24 @@ public class FFmpegHandler
             "-preset", "ultrafast",
             "-movflags", "+faststart",
 #if DEBUG
-            "-report", // Debugging log
+            "-report",
 #endif
             outputFile
         ]);
 
-        await RunFFmpegProcessAsync(args);
+        await ExecuteAsync(args);
     }
 
-    private static async Task RunFFmpegProcessAsync(params IEnumerable<string> arguments)
+    private async Task ExecuteAsync(params IEnumerable<string> arguments)
     {
         var result = await Cli.Wrap("ffmpeg")
             .WithArguments(arguments)
             .WithWorkingDirectory(Library.FFmpegDirectory)
-            .ExecuteAsync();
+            .ExecuteBufferedAsync();
 
         if (!result.IsSuccess)
         {
-            throw new Exception($"FFmpeg exited with code {result.ExitCode}");
+            Log.Error(result.StandardError);
         }
     }
 

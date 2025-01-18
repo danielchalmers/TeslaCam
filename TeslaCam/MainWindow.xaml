@@ -93,8 +93,7 @@
                 <!--  Use HW3 (HW3 = 1280x960, HW4 = 2896x1876) as the base resolution and scale it for other aspect ratios.  -->
                 <ffme:MediaElement x:Name="MediaElement"
                                    Height="960"
-                                   LoadedBehavior="Play"
-                                   SpeedRatio="6"
+                                   MediaOpening="MediaElement_MediaOpening"
                                    MediaOpened="MediaElement_MediaOpened"
                                    MediaEnded="MediaElement_MediaEnded"
                                    MediaFailed="MediaElement_MediaFailed" />

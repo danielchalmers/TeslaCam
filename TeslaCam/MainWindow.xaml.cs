@@ -61,13 +61,13 @@ public partial class MainWindow : Window
                 IsProcessing = true;
 
                 Log.Debug($"Starting new clip: {CurrentClip.FullPath}");
+                _ffmpeg.StartNewClip(CurrentClip);
 
-                var path = await _ffmpeg.StartNewClip(CurrentClip);
+                Log.Debug($"Opening media: {_ffmpeg.Uri}");
+                await MediaElement.Open(new Uri(_ffmpeg.Uri));
 
-                if (path is not null)
-                {
-                    await MediaElement.Open(new Uri(path));
-                }
+                Log.Debug($"Playing media");
+                await MediaElement.Play();
 
                 IsProcessing = false;
             }
@@ -163,19 +163,23 @@ public partial class MainWindow : Window
         LoadClips(dialog.FolderNames);
     }
 
+    private void MediaElement_MediaOpening(object sender, MediaOpeningEventArgs e)
+    {
+    }
+
     private void MediaElement_MediaOpened(object sender, MediaOpenedEventArgs e)
     {
-        Log.Debug($"Media: Opened {e.Info.MediaSource}");
+        Log.Debug($"Media Opened {e.Info.MediaSource}");
     }
 
     private void MediaElement_MediaEnded(object sender, EventArgs e)
     {
-        Log.Debug("Media: Ended");
+        Log.Debug("Media Ended");
     }
 
     private void MediaElement_MediaFailed(object sender, MediaFailedEventArgs e)
     {
-        Log.Error(e.ErrorException, "Media: Failed");
+        Log.Error(e.ErrorException, "Media Failed");
     }
 
     private void Window_Closing(object sender, CancelEventArgs e)

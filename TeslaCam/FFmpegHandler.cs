@@ -1,6 +1,5 @@
-﻿using System.IO;
-using CliWrap;
-using CliWrap.Buffered;
+﻿using System.Diagnostics;
+using System.IO;
 using Serilog;
 using TeslaCam.Data;
 using Unosquare.FFME;
@@ -9,51 +8,32 @@ namespace TeslaCam;
 
 public class FFmpegHandler : IDisposable
 {
-    private readonly string _workingFile;
     private CamClip _currentClip;
-    private LinkedListNode<CamChunk> _currentChunk;
-    private CancellationTokenSource _cts = new();
+    private Process _ffmpegProcess;
+    private readonly int _port = 57286;
 
     public FFmpegHandler()
     {
-        _workingFile = Path.Combine(Path.GetTempPath(), "TeslaCam-working-file.mp4");
+        Uri = $"udp://127.0.0.1:{_port}";
     }
 
-    public Task<string> StartNewClip(CamClip clip)
+    public string Uri { get; }
+
+    public void StartNewClip(CamClip clip)
     {
-        _cts.Cancel();
         _currentClip = clip;
-        _currentChunk = null;
-        return CreateVideoForNextChunk();
+        StreamChunk(_currentClip.Chunks.First.Value); // TODO: Load all chunks into the stream.
     }
 
-    public async Task<string> CreateVideoForNextChunk()
-    {
-        _currentChunk = _currentChunk?.Next ?? _currentClip.Chunks.First;
-
-        try
-        {
-            await RenderChunk(_currentChunk.Value, _workingFile);
-        }
-        catch (OperationCanceledException)
-        {
-            Log.Error("Render stopped");
-            return null;
-        }
-
-        return _workingFile;
-    }
-
-    private async Task RenderChunk(CamChunk chunk, string outputFile, string primary = "front")
+    private void StreamChunk(CamChunk chunk, string primary = "front")
     {
         if (chunk == null || !chunk.Files.Any())
             throw new ArgumentException("Chunk cannot be null or empty.", nameof(chunk));
 
-        if (string.IsNullOrWhiteSpace(outputFile))
-            throw new ArgumentException("Output file path cannot be null or empty.", nameof(outputFile));
-
         if (!File.Exists(chunk.Files[primary].FullPath))
             throw new ArgumentException("Primary camera file does not exist.", nameof(primary));
+
+        Log.Debug($"Primary camera: {primary}");
 
         // Common settings
         var resolution = "256x192";
@@ -74,61 +54,76 @@ public class FFmpegHandler : IDisposable
             [top_right_overlay][bottom_left_labeled]overlay={cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}:shortest=1[bottom_left_overlay];
             [bottom_left_overlay][bottom_right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}:shortest=1[output]";
 
-        List<string> args = [
-            "-y", // Overwrite existing files
-            "-i", $@"{chunk.Files[primary].FullPath}",
+        List<string> args =
+        [
+            "-stream_loop", "-1",
+            "-i", $"\"{chunk.Files[primary].FullPath}\"",
         ];
 
-        void AddCam(string name)
+        void AddCamSquare(string name)
         {
             var file = chunk.Files.GetValueOrDefault(name);
 
             if (file is null || file.Camera == primary)
             {
+                Log.Debug($"Adding black square for {file.Camera}");
                 args.Add("-f");
                 args.Add("lavfi");
                 args.Add("-i");
-                args.Add($"color=black");
+                args.Add("color=black");
             }
             else
             {
+                Log.Debug($"Adding file stream for {file.Camera}");
                 args.Add("-i");
-                args.Add($@"{file.FullPath}");
+                args.Add($"\"{file.FullPath}\"");
             }
         }
 
-        AddCam("front");
-        AddCam("back");
-        AddCam("left_repeater");
-        AddCam("right_repeater");
+        AddCamSquare("front");
+        AddCamSquare("back");
+        AddCamSquare("left_repeater");
+        AddCamSquare("right_repeater");
 
-        args.AddRange([
-            "-filter_complex", filterComplex,
+        args.AddRange(
+        [
+            "-filter_complex", $"\"{filterComplex}\"",
             "-map", "[output]",
             "-c:v", "libx264",
             "-preset", "ultrafast",
             "-movflags", "+faststart",
 #if DEBUG
-            "-report",
+        "-report",
 #endif
-            outputFile
-        ]);
+            "-f", "mpegts",
+            Uri
+    ]);
 
-        await ExecuteAsync(args);
+        StopFFmpeg();
+
+        _ffmpegProcess = new()
+        {
+            StartInfo = new()
+            {
+                FileName = "ffmpeg",
+                Arguments = string.Join(" ", args),
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        Log.Debug($"{_ffmpegProcess.StartInfo.FileName} {_ffmpegProcess.StartInfo.Arguments}");
+        _ffmpegProcess.Start();
     }
 
-    private async Task ExecuteAsync(params IEnumerable<string> arguments)
+    private void StopFFmpeg()
     {
-        _cts = new();
-
-        var result = await Cli.Wrap("ffmpeg")
-            .WithArguments(arguments)
-            .WithWorkingDirectory(Library.FFmpegDirectory)
-            .ExecuteBufferedAsync(_cts.Token);
-
-        if (!result.IsSuccess)
+        if (_ffmpegProcess?.HasExited == false)
         {
-            Log.Error(result.StandardError);
+            Log.Debug("Killing current ffmpeg process");
+            _ffmpegProcess.Kill();
+            _ffmpegProcess.Dispose();
+            _ffmpegProcess = null;
         }
     }
 
@@ -167,7 +162,6 @@ public class FFmpegHandler : IDisposable
 
     public void Dispose()
     {
-        _cts.Cancel();
-        _cts.Dispose();
+        StopFFmpeg();
     }
 }

@@ -93,15 +93,27 @@
                 <!--  Use HW3 (HW3 = 1280x960, HW4 = 2896x1876) as the base resolution and scale it for other aspect ratios.  -->
                 <ffme:MediaElement x:Name="MediaElement"
                                    Height="960"
+                                   MediaInitializing="MediaElement_MediaInitializing"
                                    MediaOpening="MediaElement_MediaOpening"
                                    MediaOpened="MediaElement_MediaOpened"
                                    MediaEnded="MediaElement_MediaEnded"
-                                   MediaFailed="MediaElement_MediaFailed" />
+                                   MediaFailed="MediaElement_MediaFailed"
+                                   BufferingStarted="MediaElement_BufferingStarted"
+                                   BufferingEnded="MediaElement_BufferingEnded" />
             </Viewbox>
 
-            <ProgressBar Grid.Row="1"
-                         IsIndeterminate="True"
-                         Visibility="{Binding IsProcessing, Converter={local:BooleanToVisibilityConverter}}" />
+            <ProgressBar Grid.Row="1" IsIndeterminate="True">
+                <ProgressBar.Style>
+                    <Style TargetType="ProgressBar" BasedOn="{StaticResource {x:Type ProgressBar}}">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsProcessing}" Value="false">
+                                <Setter Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ProgressBar.Style>
+            </ProgressBar>
         </Grid>
     </Grid>
 </Window>

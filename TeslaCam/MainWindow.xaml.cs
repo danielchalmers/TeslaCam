@@ -54,23 +54,51 @@ public partial class MainWindow : Window
     {
         if (e.PropertyName == nameof(CurrentClip) && Library.IsInitialized)
         {
+            ErrorMessage = null;
+
             await MediaElement.Close();
 
             if (CurrentClip is not null)
             {
-                IsProcessing = true;
-
-                Log.Debug($"Starting new clip: {CurrentClip.FullPath}");
-                _ffmpeg.StartNewClip(CurrentClip);
-
-                Log.Debug($"Opening media: {_ffmpeg.Uri}");
-                await MediaElement.Open(new Uri(_ffmpeg.Uri));
-
-                Log.Debug($"Playing media");
-                await MediaElement.Play();
-
-                IsProcessing = false;
+                await LoadClip();
             }
+        }
+    }
+
+    private async Task LoadClip()
+    {
+        IsProcessing = true;
+
+        try
+        {
+            Log.Debug($"Loading clip: {CurrentClip.FullPath}");
+            var result = await _ffmpeg.StartNewClip(CurrentClip);
+
+            if (!result)
+            {
+                ErrorMessage = "Failed to render clip";
+                return;
+            }
+
+            result = await MediaElement.Open(_ffmpeg.Uri);
+
+            if (!result)
+            {
+                ErrorMessage = "Failed to open clip";
+                return;
+            }
+
+            result = await MediaElement.Play();
+
+            if (!result)
+            {
+                ErrorMessage = "Failed to play clip";
+                return;
+            }
+        }
+        finally
+        {
+            IsProcessing = false;
         }
     }
 
@@ -163,8 +191,22 @@ public partial class MainWindow : Window
         LoadClips(dialog.FolderNames);
     }
 
+    partial void OnErrorMessageChanged(string value)
+    {
+        if (value is not null)
+        {
+            Log.Error(value);
+        }
+    }
+
+    private void MediaElement_MediaInitializing(object sender, MediaInitializingEventArgs e)
+    {
+        Log.Debug("Media Initializing");
+    }
+
     private void MediaElement_MediaOpening(object sender, MediaOpeningEventArgs e)
     {
+        Log.Debug($"Media Opening {e.Info.MediaSource}");
     }
 
     private void MediaElement_MediaOpened(object sender, MediaOpenedEventArgs e)
@@ -182,8 +224,16 @@ public partial class MainWindow : Window
         Log.Error(e.ErrorException, "Media Failed");
     }
 
+    private void MediaElement_BufferingStarted(object sender, EventArgs e)
+    {
+    }
+
+    private void MediaElement_BufferingEnded(object sender, EventArgs e)
+    {
+    }
+
     private void Window_Closing(object sender, CancelEventArgs e)
     {
-        _ffmpeg.Dispose();
+        _ffmpeg?.Dispose();
     }
 }

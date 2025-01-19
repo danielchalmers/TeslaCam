@@ -10,19 +10,42 @@ public class FFmpegHandler : IDisposable
 {
     private CamClip _currentClip;
     private Process _ffmpegProcess;
-    private readonly int _port = 57286;
+    private readonly string _tempFilePath = Path.Combine(Path.GetTempPath(), $"{App.AssemblyTitle}.ts");
 
     public FFmpegHandler()
     {
-        Uri = $"udp://127.0.0.1:{_port}";
+        Uri = new Uri(_tempFilePath);
     }
 
-    public string Uri { get; }
+    public Uri Uri { get; }
 
-    public void StartNewClip(CamClip clip)
+    public async Task<bool> StartNewClip(CamClip clip)
     {
-        _currentClip = clip;
-        StreamChunk(_currentClip.Chunks.First.Value); // TODO: Load all chunks into the stream.
+        try
+        {
+            _currentClip = clip;
+            StreamChunk(_currentClip.Chunks.First.Value);
+
+            await Task.Delay(2000); // TODO: Implement better way to wait for ffmpeg to start and buffer.
+
+            return await WaitForStream(_tempFilePath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to start clip");
+            return false;
+        }
+    }
+
+    public async Task<bool> WaitForStream(string filePath, int checkInterval = 100)
+    {
+        while (true)
+        {
+            if (File.Exists(_tempFilePath) && new FileInfo(_tempFilePath).Length > 0)
+                return true;
+
+            await Task.Delay(checkInterval);
+        }
     }
 
     private void StreamChunk(CamChunk chunk, string primary = "front")
@@ -32,6 +55,8 @@ public class FFmpegHandler : IDisposable
 
         if (!File.Exists(chunk.Files[primary].FullPath))
             throw new ArgumentException("Primary camera file does not exist.", nameof(primary));
+
+        StopFFmpeg();
 
         Log.Debug($"Primary camera: {primary}");
 
@@ -49,14 +74,14 @@ public class FFmpegHandler : IDisposable
             [4:v]scale={resolution}[bottom_right_scaled];
             [bottom_right_scaled]drawtext=text='Right':x=5:y=h-25:fontsize=20:fontcolor=white[bottom_right_labeled];
 
-            [0:v][top_left_labeled]overlay={cameraPadding}:{cameraPadding}:shortest=1[top_left_overlay];
-            [top_left_overlay][top_right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:{cameraPadding}:shortest=1[top_right_overlay];
-            [top_right_overlay][bottom_left_labeled]overlay={cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}:shortest=1[bottom_left_overlay];
-            [bottom_left_overlay][bottom_right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}:shortest=1[output]";
+            [0:v][top_left_labeled]overlay={cameraPadding}:{cameraPadding}[top_left_overlay];
+            [top_left_overlay][top_right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:{cameraPadding}[top_right_overlay];
+            [top_right_overlay][bottom_left_labeled]overlay={cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}[bottom_left_overlay];
+            [bottom_left_overlay][bottom_right_labeled]overlay=W-{resolution.Split('x')[0]}-{cameraPadding}:H-{resolution.Split('x')[1]}-{cameraPadding}[output]";
 
         List<string> args =
         [
-            "-stream_loop", "-1",
+            "-y",
             "-i", $"\"{chunk.Files[primary].FullPath}\"",
         ];
 
@@ -96,10 +121,8 @@ public class FFmpegHandler : IDisposable
         "-report",
 #endif
             "-f", "mpegts",
-            Uri
-    ]);
-
-        StopFFmpeg();
+            _tempFilePath
+        ]);
 
         _ffmpegProcess = new()
         {

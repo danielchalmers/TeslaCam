@@ -34,16 +34,16 @@
             <!--  Display all clips with thumbnails  -->
             <ListView Grid.Row="1"
                       ItemsSource="{Binding Clips}"
-                      SelectedItem="{Binding CurrentClip, Mode=TwoWay}">
+                      SelectedItem="{Binding CurrentStream, Mode=TwoWay}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Height="96">
-                            <Image Source="{Binding ThumbnailPath}"
+                            <Image Source="{Binding Clip.ThumbnailPath}"
                                    Width="128"
                                    Stretch="Uniform" />
 
-                            <TextBlock Text="{Binding Summary}"
-                                       ToolTip="{Binding Summary}"
+                            <TextBlock Text="{Binding Clip.Summary}"
+                                       ToolTip="{Binding Clip.Summary}"
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center"
@@ -107,7 +107,7 @@
                     <Style TargetType="ProgressBar" BasedOn="{StaticResource {x:Type ProgressBar}}">
                         <Setter Property="Visibility" Value="Visible" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsProcessing}" Value="false">
+                            <DataTrigger Binding="{Binding BusyCount}" Value="0">
                                 <Setter Property="Visibility" Value="Hidden" />
                             </DataTrigger>
                         </Style.Triggers>

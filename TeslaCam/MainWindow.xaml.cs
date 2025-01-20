@@ -15,12 +15,10 @@ namespace TeslaCam;
 [ObservableObject]
 public partial class MainWindow : Window
 {
-    private readonly FFmpegHandler _ffmpeg = new();
-    private readonly List<CamClip> _clips = [];
+    private readonly List<ClipStream> _clips = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Clips))]
-    private CamClip _currentClip;
+    private ClipStream _currentStream;
 
     [ObservableProperty]
     private string _errorMessage;
@@ -30,13 +28,12 @@ public partial class MainWindow : Window
     private string _filterText = string.Empty;
 
     [ObservableProperty]
-    private bool _isProcessing;
+    private int _busyCount;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = this;
-        PropertyChanged += OnPropertyChanged;
 
         LoadClips(CamStorage.FindCommonRoots());
     }
@@ -44,67 +41,76 @@ public partial class MainWindow : Window
     /// <summary>
     /// A proxy for the clips list that handles ordering and filtering.
     /// </summary>
-    public IReadOnlyList<CamClip> Clips => _clips
-        .Where(x => x.Summary.Contains(FilterText, StringComparison.CurrentCultureIgnoreCase))
-        .OrderByDescending(x => x.Timestamp) // Order newest by timestamp, either from folder name or event data.
-        .ThenBy(x => x.Name) // If the timestamp couldn't be found the clip will go to the bottom where we then order by the folder name.
+    public IReadOnlyList<ClipStream> Clips => _clips
+        .Where(x => x.Clip.Summary.Contains(FilterText, StringComparison.CurrentCultureIgnoreCase))
+        .OrderByDescending(x => x.Clip.Timestamp) // Order newest by timestamp, either from folder name or event data.
+        .ThenBy(x => x.Clip.Name) // If the timestamp couldn't be found the clip will go to the bottom where we then order by the folder name.
         .ToList();
 
-    protected async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+    partial void OnCurrentStreamChanging(ClipStream oldValue, ClipStream newValue)
     {
-        if (e.PropertyName == nameof(CurrentClip) && Library.IsInitialized)
+        BusyCount++;
+        ErrorMessage = null;
+
+        Task.Run(async () =>
         {
-            ErrorMessage = null;
-
-            await MediaElement.Close();
-
-            if (CurrentClip is not null)
+            try
             {
-                await LoadClip();
+                await MediaElement.Close();
+
+                if (oldValue is not null)
+                {
+                    await oldValue.StopStream();
+                }
+
+                if (CurrentStream is not null && Library.IsInitialized)
+                {
+                    ErrorMessage = await LoadClip(CurrentStream);
+                }
             }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to switch streams");
+            }
+            finally
+            {
+                BusyCount--;
+            }
+        });
+    }
+
+    partial void OnErrorMessageChanged(string value)
+    {
+        if (value is not null)
+        {
+            Log.Error(value);
         }
     }
 
-    private async Task LoadClip()
+    private async Task<string> LoadClip(ClipStream stream)
     {
-        IsProcessing = true;
+        Log.Debug($"Loading clip from {stream.Clip.FullPath}");
+        var result = await stream.StartStream();
 
-        try
-        {
-            Log.Debug($"Loading clip: {CurrentClip.FullPath}");
-            var result = await _ffmpeg.StartNewClip(CurrentClip);
+        if (!result)
+            return "Failed to render clip";
 
-            if (!result)
-            {
-                ErrorMessage = "Failed to render clip";
-                return;
-            }
+        result = await MediaElement.Open(stream.Uri);
 
-            result = await MediaElement.Open(_ffmpeg.Uri);
+        if (!result)
+            return "Failed to open clip";
 
-            if (!result)
-            {
-                ErrorMessage = "Failed to open clip";
-                return;
-            }
+        result = await MediaElement.Play();
 
-            result = await MediaElement.Play();
+        if (!result)
+            return "Failed to play clip";
 
-            if (!result)
-            {
-                ErrorMessage = "Failed to play clip";
-                return;
-            }
-        }
-        finally
-        {
-            IsProcessing = false;
-        }
+        return null;
     }
 
     private async void Window_ContentRendered(object sender, EventArgs e)
     {
-        var loaded = FFmpegHandler.TryLoadFFmpeg();
+        var loaded = ClipStream.TryLoadFFmpeg();
 
         if (!loaded)
         {
@@ -112,7 +118,7 @@ public partial class MainWindow : Window
 
             if (shouldInstall)
             {
-                IsProcessing = true;
+                BusyCount++;
 
                 try
                 {
@@ -123,9 +129,9 @@ public partial class MainWindow : Window
                     MessageBox.Show(this, $"Failed to download ffmpeg: {ex.Message}", App.Title, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
-                loaded = FFmpegHandler.TryLoadFFmpeg();
+                loaded = ClipStream.TryLoadFFmpeg();
 
-                IsProcessing = false;
+                BusyCount--;
 
                 if (!loaded)
                 {
@@ -142,7 +148,7 @@ public partial class MainWindow : Window
     private void LoadClips(params IEnumerable<string> roots)
     {
         ErrorMessage = null;
-        CurrentClip = null;
+        CurrentStream = null;
         _clips.Clear();
 
         if (!roots.Any())
@@ -158,7 +164,7 @@ public partial class MainWindow : Window
             try
             {
                 var storage = CamStorage.Map(root);
-                _clips.AddRange(storage.Clips);
+                _clips.AddRange(storage.Clips.Select(c => new ClipStream(c)));
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -191,17 +197,8 @@ public partial class MainWindow : Window
         LoadClips(dialog.FolderNames);
     }
 
-    partial void OnErrorMessageChanged(string value)
-    {
-        if (value is not null)
-        {
-            Log.Error(value);
-        }
-    }
-
     private void MediaElement_MediaInitializing(object sender, MediaInitializingEventArgs e)
     {
-        Log.Debug("Media Initializing");
     }
 
     private void MediaElement_MediaOpening(object sender, MediaOpeningEventArgs e)
@@ -211,7 +208,6 @@ public partial class MainWindow : Window
 
     private void MediaElement_MediaOpened(object sender, MediaOpenedEventArgs e)
     {
-        Log.Debug($"Media Opened {e.Info.MediaSource}");
     }
 
     private void MediaElement_MediaEnded(object sender, EventArgs e)
@@ -232,8 +228,13 @@ public partial class MainWindow : Window
     {
     }
 
-    private void Window_Closing(object sender, CancelEventArgs e)
+    private async void Window_Closing(object sender, CancelEventArgs e)
     {
-        _ffmpeg?.Dispose();
+        await MediaElement.Close();
+
+        if (CurrentStream is not null)
+        {
+            await CurrentStream.DisposeAsync();
+        }
     }
 }
